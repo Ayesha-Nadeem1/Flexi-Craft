@@ -1,0 +1,50 @@
+/* AnimationSet.module.css */
+@keyframes wave {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes swing {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(45deg); }
+}
+
+@keyframes roll {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(360deg); }
+}
+
+@keyframes scale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.5); }
+}
+
+.animateWave {
+  animation: wave 2s infinite;
+}
+
+.animateFlash {
+  animation: flash 1s infinite;
+}
+
+.animateSwing {
+  animation: swing 1s infinite;
+}
+
+.animateRoll {
+  animation: roll 1s infinite;
+}
+
+.animateScale {
+  animation: scale 1s infinite;
+}
+
+.animateSpin {
+  animation: spin 1s infinite;
+}

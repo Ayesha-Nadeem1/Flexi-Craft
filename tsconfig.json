@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",  // Use "react" if you're using React 17 or lower
+    "baseUrl": ".",      // Set base URL for module resolution
+    "paths": {
+      "*": ["src/*"],     // Adjust as needed for your project structure
+      "@/*": ["*"]        // This allows you to use @ to reference the src directory
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/index.js"], // Include your source files
+  "exclude": ["node_modules"] // Exclude node_modules
+}

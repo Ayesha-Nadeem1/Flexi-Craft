@@ -1,0 +1,303 @@
+body {
+  background: #fff;
+  font-family: "Comfortaa", sans-serif;
+  position: relative;
+}
+
+footer {
+  text-align: center;
+  padding: 1em;
+  max-width: 80px;
+  position: fixed;
+  top: 0;
+  right: 25px;
+}
+
+footer a {
+  text-decoration: none;
+  display: inline-block;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px dashed #fff;
+  color: #fff;
+  margin: 5px;
+}
+
+footer a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+footer .icons {
+  margin-top: 12px;
+  display: inline-block;
+  font-size: 20px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.main-content {
+  text-align: center;
+  text-transform: uppercase;
+  scroll-snap-type: y mandatory;
+  position: relative;
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+.hover,
+.word,
+h1 {
+  cursor: pointer;
+}
+
+h1 {
+  position: relative;
+  color: #fff;
+  font: 900 60px "Comfortaa", sans-serif;
+  text-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.concept {
+  position: relative;
+  padding: 5em;
+  height: 100vh;
+  overflow: hidden;
+  scroll-snap-align: center;
+}
+
+.concept-one {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  background: url("https://meowlivia.s3.us-east-2.amazonaws.com/codepen/background/desert.jpg")
+    no-repeat center center / cover;
+  padding: 8em;
+}
+
+.concept-two {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  padding: 5em 15em;
+  background: url("https://meowlivia.s3.us-east-2.amazonaws.com/codepen/background/forest.jpg")
+    center center / cover;
+}
+
+.concept-three {
+  padding: 5em;
+  .word {
+    display: flex;
+    align-items: center;
+    max-width: 500px;
+    margin: auto;
+  }
+  background: url("https://meowlivia.s3.us-east-2.amazonaws.com/codepen/background/canyon.jpg")
+    center center / cover;
+}
+
+.concept-four {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 2em;
+  background: url("https://meowlivia.s3.us-east-2.amazonaws.com/codepen/background/glacier.jpg")
+    no-repeat center center / cover;
+}
+
+.concept-five {
+  background: url("https://meowlivia.s3.us-east-2.amazonaws.com/codepen/background/mountains.jpg")
+    center center / cover;
+  display: flex;
+  align-items: center;
+  .word {
+    width: 600px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80%;
+  }
+}
+
+.concept-six {
+  display: flex;
+  align-items: center;
+  background: url("https://meowlivia.s3.us-east-2.amazonaws.com/codepen/background/beach.jpg") top
+    right / cover;
+  .word {
+    width: 550px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80%;
+  }
+}
+
+.concept-seven {
+  background: url("https://meowlivia.s3.us-east-2.amazonaws.com/codepen/background/fries.jpg")
+    top center / cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.concept-eight {
+  background: url("https://meowlivia.s3.us-east-2.amazonaws.com/codepen/background/falls.jpg")
+    center center / cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .word {
+    width: 550px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80%;
+  }
+}
+
+/* Keyframe Animations */
+@keyframes jump-out {
+  0% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+@keyframes falls {
+  0% {
+    opacity: 0;
+    top: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    top: 100px;
+  }
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes color-shift {
+  0% {
+    color: #fff;
+  }
+  50% {
+    color: #f00;
+  }
+  100% {
+    color: #fff;
+  }
+}
+
+@keyframes slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes desert-animation {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* Animation Classes */
+.hover {
+  animation: jump-out 2s infinite;
+}
+
+.hover-bounce {
+  animation: bounce 1s infinite;
+}
+
+.hover-rotate {
+  animation: rotate 2s linear infinite;
+}
+
+.hover-color {
+  animation: color-shift 3s infinite;
+}
+
+.hover-slide {
+  animation: slide 1s ease-in-out;
+}
+
+/* Specific Animation for Each Concept */
+.concept-one .hover {
+  animation: desert-animation 3s infinite;
+}
+
+.concept-two .hover {
+  animation: bounce 1s infinite;
+}
+
+.concept-three .hover {
+  animation: jump-out 4s linear infinite;
+}
+
+.concept-four .hover {
+  animation: color-shift 3s infinite;
+}
+
+.concept-five .hover {
+  animation: slide 5s ease-in-out infinite;
+}
+
+.concept-six .hover {
+  animation: bounce 1s infinite;
+}
+
+.concept-seven .hover {
+  animation: slide 3s ease-in-out infinite;
+}
+
+.concept-eight .hover {
+  animation: color-shift 3s infinite;
+}
