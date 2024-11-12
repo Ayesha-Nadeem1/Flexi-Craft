@@ -1,6 +1,5 @@
 'use client'
 
-
 import { Badge } from '../ui/badge'
 import { EditorElement, useEditor } from '../../pages/editor-provider'
 import clsx from 'clsx'
@@ -68,7 +67,7 @@ const Navbar: React.FC<{ element: EditorElement }> = ({ element }) => {
   }
 
   const handleSaveEdit = (index: number) => {
-    setLinks((prevLinks) => prevLinks.map((link, i) => i === index ? { ...link, name: editName } : link))
+    setLinks((prevLinks) => prevLinks.map((link, i) => (i === index ? { ...link, name: editName } : link)))
     setEditIndex(null)
   }
 
@@ -94,8 +93,8 @@ const Navbar: React.FC<{ element: EditorElement }> = ({ element }) => {
           <Badge className="absolute top-2 left-2 rounded-none rounded-t-lg">
             {state.editor.selectedElement.name}
           </Badge>
-          <div 
-            className="absolute top-2 right-2 bg-red-500 px-2.5 py-1 text-xs font-bold rounded-none rounded-t-lg text-white cursor-pointer" 
+          <div
+            className="absolute top-2 right-2 bg-red-500 px-2.5 py-1 text-xs font-bold rounded-none rounded-t-lg text-white cursor-pointer"
             onClick={handleDeleteContainer}
           >
             <Trash size={16} />
@@ -156,8 +155,8 @@ const Navbar: React.FC<{ element: EditorElement }> = ({ element }) => {
               </a>
             )}
             {state.editor.selectedElement.id === element.id && !state.editor.liveMode && (
-              <div 
-                className="absolute bg-red-500 px-2.5 py-1 text-xs font-bold -top-2 -right-2 rounded-none rounded-t-lg text-white cursor-pointer" 
+              <div
+                className="absolute bg-red-500 px-2.5 py-1 text-xs font-bold -top-2 -right-2 rounded-none rounded-t-lg text-white cursor-pointer"
                 onClick={() => handleDeleteLink(index)}
               >
                 <Trash size={16} />
@@ -168,6 +167,64 @@ const Navbar: React.FC<{ element: EditorElement }> = ({ element }) => {
       </ul>
     </nav>
   )
+}
+
+export const exportTonavCode = (element: EditorElement) => {
+  const { styles, links, orientation } = element
+  const navLinks = links?.map((link) => `<a href="${link.href}">${link.name}</a>`).join('\n')
+  const orientationClass = orientation === 'horizontal' ? 'flex items-center justify-between' : 'flex-col'
+
+  return `
+    import React from 'react';
+
+    const Navbar = ({ textColor = '${element.styles.color || '#ffffff'}', bgColor = '${element.styles.backgroundColor || '#333333'}' }) => (
+      <nav
+        style={{ color: textColor, backgroundColor: bgColor, ...${JSON.stringify(styles)} }}
+        className="p-4 ${orientationClass}"
+      >
+              <ul className={clsx('flex', { 'space-x-4': isHorizontal, 'flex-col space-y-4': !isHorizontal })}>
+        {links.map((link, index) => (
+          <li key={index} className="relative">
+            {editIndex === index ? (
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="p-1 rounded text-black"
+                />
+                <button
+                  onClick={() => handleSaveEdit(index)}
+                  className="bg-blue-500 text-white px-2 py-1 rounded"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <a
+                href={link.href}
+                className="hover:underline"
+                onDoubleClick={() => handleEditLink(index)}
+              >
+                {link.name}
+              </a>
+            )}
+            {state.editor.selectedElement.id === element.id && !state.editor.liveMode && (
+              <div
+                className="absolute bg-red-500 px-2.5 py-1 text-xs font-bold -top-2 -right-2 rounded-none rounded-t-lg text-white cursor-pointer"
+                onClick={() => handleDeleteLink(index)}
+              >
+                <Trash size={16} />
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+      </nav>
+    );
+
+    export default Navbar;
+  `
 }
 
 export default Navbar

@@ -153,6 +153,41 @@ const Container = ({ element }: Props) => {
         })
     break
 
+    case 'signup':
+      dispatch({
+        type: 'ADD_ELEMENT',
+        payload: {
+          containerId: id,
+          elementDetails: {
+            content: [],
+            id: uuidv4(),
+            name: 'Sign up',
+            styles: {},
+            type: 'signup',
+          },
+        },
+      })
+  break
+
+
+
+  case 'signin':
+    dispatch({
+      type: 'ADD_ELEMENT',
+      payload: {
+        containerId: id,
+        elementDetails: {
+          content: [],
+          id: uuidv4(),
+          name: 'Sign In',
+          styles: {},
+          type: 'signin',
+        },
+      },
+    })
+break
+
+
     case 'hero':
       dispatch({
         type: 'ADD_ELEMENT',

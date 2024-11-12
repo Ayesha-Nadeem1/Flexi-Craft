@@ -149,4 +149,75 @@ const LoadingComponent = (props: Props) => {
   )
 }
 
+export const exportToloadCode = (element: EditorElement) => {
+  const { styles, id, name } = element;
+
+  return `
+    import React, { useState, useEffect } from 'react';
+    
+    const LoadingComponent = () => {
+      const [progress, setProgress] = useState(0);
+      const [loadingElements, setLoadingElements] = useState([
+        'spinner',
+        'progressBar',
+        'dots',
+        'skeletonScreen',
+      ]);
+
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setProgress((prev) => (prev < 100 ? prev + 10 : 0));
+        }, 500);
+        return () => clearInterval(interval);
+      }, []);
+
+      return (
+        <section
+          style={${JSON.stringify(styles)}}
+          className="flex flex-col items-center justify-center text-center py-16 relative gap-4"
+        >
+          <div id="${id}">
+            <p>${name}</p>
+            
+            {/* Spinner */}
+            {loadingElements.includes('spinner') && (
+              <div className="relative">
+                <div className="border-t-4 border-b-4 border-primary border-solid rounded-full w-16 h-16 animate-spin"></div>
+              </div>
+            )}
+
+            {/* Progress Bar */}
+            {loadingElements.includes('progressBar') && (
+              <div className="relative w-full bg-gray-300 rounded-full h-2.5">
+                <div
+                  className="bg-primary h-2.5 rounded-full"
+                  style={{ width: \`\${progress}%\` }}
+                ></div>
+              </div>
+            )}
+
+            {/* Dots */}
+            {loadingElements.includes('dots') && (
+              <div className="relative flex space-x-1">
+                <div className="bg-primary w-2.5 h-2.5 rounded-full animate-bounce delay-75"></div>
+                <div className="bg-primary w-2.5 h-2.5 rounded-full animate-bounce delay-150"></div>
+                <div className="bg-primary w-2.5 h-2.5 rounded-full animate-bounce delay-300"></div>
+              </div>
+            )}
+
+            {/* Skeleton Screen */}
+            {loadingElements.includes('skeletonScreen') && (
+              <div className="relative w-full h-12 bg-gray-300 animate-pulse rounded"></div>
+            )}
+          </div>
+        </section>
+      );
+    };
+
+    export default LoadingComponent;
+  `;
+};
+
+
+
 export default LoadingComponent

@@ -187,4 +187,66 @@ const GridAndCards: React.FC<{ element: EditorElement }> = ({ element }) => {
   )
 }
 
+export const exportToGridAndCardsCode = (element: EditorElement) => {
+  const cards = JSON.stringify(
+    element.cards || [
+      { title: 'Card 1', description: 'This is the first card.', imageUrl: 'https://via.placeholder.com/150' },
+      { title: 'Card 2', description: 'This is the second card.', imageUrl: 'https://via.placeholder.com/150' },
+      { title: 'Card 3', description: 'This is the third card.', imageUrl: 'https://via.placeholder.com/150' },
+    ]
+  );
+  const cardColor = JSON.stringify(element.styles.backgroundColor || '#ffffff');
+  const columns = 3;
+
+  return `
+ 
+
+    const GridAndCards = () => {
+      const [cards, setCards] = useState(${cards});
+      const [columns, setColumns] = useState(${columns});
+      const [cardColor, setCardColor] = useState(${cardColor});
+
+
+      return (
+        <section
+          style={{ backgroundColor: cardColor }}
+          className="relative p-4"
+        >
+          <div className="grid gap-4" style={{ gridTemplateColumns: \`repeat(${columns}, minmax(0, 1fr))\` }}>
+            {cards.map((card, index) => (
+              <div key={index} className="relative bg-white shadow-lg rounded-lg overflow-hidden">
+                <img src={card.imageUrl} alt={card.title} className="w-full h-32 object-cover" />
+                <div className="p-4">
+                  <textarea
+                   
+                    value={card.title}
+                    placeholder="Enter card title"
+                    className="w-full text-xl font-semibold border p-1 mb-2 rounded"
+                  />
+                  <textarea
+                    value={card.description}
+                    placeholder="Enter card description"
+                    className="w-full text-gray-600 border p-1 rounded"
+                    rows={3}
+                  />
+                  <input
+                    type="text"
+                    value={card.imageUrl}
+                    placeholder="Enter image URL"
+                    className="p-1 border rounded mr-2 w-80"
+                  />
+
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </section>
+      );
+    };
+
+    export default GridAndCards;
+  `;
+};
+
 export default GridAndCards

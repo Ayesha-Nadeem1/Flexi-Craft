@@ -89,4 +89,26 @@ const TextComponent = (props: Props) => {
   );
 };
 
+
+export const generateTextComponentCode = (element: EditorElement) => {
+  return `
+    const TextComponent = () => {
+      const textContent = '${element.texttitle || 'Sample Text'}'; // Only export the changes made by the user
+      const styles = ${JSON.stringify(element.styles)};
+    
+      return (
+        <div style={styles} className="p-[2px] w-full m-[5px] relative text-[16px] transition-all">
+          <span>
+            ${element.texttitle || 'Sample Text'}
+          </span>
+        </div>
+      );
+    };
+    
+    export default TextComponent;
+  `;
+};
+
+
+
 export default React.memo(TextComponent);

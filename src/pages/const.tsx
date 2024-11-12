@@ -37,6 +37,10 @@ export type EditorBtns =
   | 'header'
   | null
   | '3Col'
+  | 'signin'
+  | 'signup'
+
+
 
 export const defaultStyles: React.CSSProperties = {
   backgroundPosition: 'center',

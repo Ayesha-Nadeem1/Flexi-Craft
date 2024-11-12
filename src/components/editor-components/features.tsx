@@ -120,4 +120,71 @@ const FeaturesSection = (props: Props) => {
   );
 };
 
+export const exportToFeaturesSectionCode = (element: EditorElement) => {
+  const styles = JSON.stringify(element.styles || {});
+  const featureTitle = JSON.stringify(element.feature_title || 'Our Amazing Features');
+  const featureDescription = JSON.stringify(element.feature_description || 'Discover the innovative features we offer.');
+
+  const features = ['feature1', 'feature2', 'feature3', 'feature4'].map((featureKey, index) => {
+    return {
+      featureTitle: JSON.stringify(element[featureKey] || `Feature ${index + 1}`),
+      featureDescription: JSON.stringify(element[`${featureKey}Description`] || 'Description of the feature.'),
+      icon: index === 0 ? 'Star' : index === 1 ? 'Settings' : index === 2 ? 'PentagonIcon' : 'Grid',
+    };
+  });
+
+  return `
+
+    import DOMPurify from 'dompurify';
+    import { Star, Settings, PentagonIcon, Grid } from 'lucide-react';
+
+    const FeaturesSection = ({ styles = ${styles}, featureTitle = ${featureTitle}, featureDescription = ${featureDescription}, features = ${JSON.stringify(features)} }) => {
+      const handleUpdateContent = (field, e) => {
+        const sanitizedContent = DOMPurify.sanitize(e.target.innerHTML);
+        // Handle content update logic
+      };
+
+      return (
+        <section style={styles} className="p-6 text-black relative">
+          <h2
+            
+            className="text-3xl font-bold mb-6 text-center"
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(featureTitle) }}
+          />
+          
+          <p
+            
+            className="text-lg mb-8 text-center"
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(featureDescription) }}
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+            {features.map((feature, index) => (
+              <div key={index} className="p-6 bg-white text-gray-800 rounded-lg shadow-lg flex flex-col items-center">
+                {feature.icon === 'Star' && <Star size={40} className="mb-4 text-yellow-400" />}
+                {feature.icon === 'Settings' && <Settings size={40} className="mb-4 text-green-400" />}
+                {feature.icon === 'PentagonIcon' && <PentagonIcon size={40} className="mb-4 text-red-400" />}
+                {feature.icon === 'Grid' && <Grid size={40} className="mb-4 text-blue-400" />}
+                <h3
+                  
+                  className="text-xl font-semibold mb-2"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(feature.featureTitle) }}
+                />
+                <p
+                  
+                  className="text-gray-600"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(feature.featureDescription) }}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    };
+
+    export default FeaturesSection;
+  `;
+};
+
+
 export default FeaturesSection;

@@ -98,4 +98,60 @@ const TextAnimation: React.FC<Props> = ({ element }) => {
   );
 };
 
+export const exportToTextAnimationCode = (element: EditorElement) => {
+  const textColor = JSON.stringify(element.styles.color || '#000000');
+  const textItems = ['world !', 'guys !', 'users !', 'everybody !'];
+
+  return `
+
+    const TextAnimation = () => {
+      const [textColor, setTextColor] = useState(${textColor});
+
+      const handleTextColorChange = (e) => {
+        setTextColor(e.target.value);
+      };
+
+      return (
+        <div
+          className="content relative"
+          style={{ ...${JSON.stringify(element.styles)}, color: textColor }}
+        >
+          <div className="content__container">
+            <p className="content__container__text">
+              Hello
+            </p>
+            <ul className="content__container__list">
+              ${textItems
+                .map(
+                  (text, index) => `
+                  <li key={${index}} className="content__container__list__item">
+                    ${text}
+                  </li>`
+                )
+                .join('')}
+            </ul>
+          </div>
+          <div className="editor-controls absolute bottom-0 left-0 w-full flex justify-between items-center p-2 bg-white bg-opacity-75">
+            <div className="flex items-center mr-2">
+              <label htmlFor="text-color" className="mr-1 text-sm">
+                Text Color:
+              </label>
+              <input
+                id="text-color"
+                type="color"
+                value={textColor}
+                onChange={handleTextColorChange}
+                className="border border-gray-300 rounded"
+              />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    export default TextAnimation;
+  `;
+};
+
+
 export default TextAnimation;

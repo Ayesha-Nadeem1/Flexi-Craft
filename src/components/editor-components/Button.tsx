@@ -96,4 +96,22 @@ const ButtonSection = (props: Props) => {
   );
 };
 
+export const generatebuttonCode = (element: EditorElement) => {
+  return `
+
+const Button = () => {
+  const styles = ${JSON.stringify(element.styles)};
+  
+  return (
+    <button style={styles}>
+      ${element.buttontext || 'Button'}
+    </button>
+  );
+};
+
+export default Button;
+  `;
+};
+
+
 export default ButtonSection;

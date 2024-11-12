@@ -98,4 +98,58 @@ const ButtonSet: React.FC<Props> = ({ element }) => {
   );
 };
 
+export const exportToButtonSetCode = (element: EditorElement) => {
+  const styles = JSON.stringify(element.styles || {});
+  const button1Text = element.button1 || 'Button 1';
+  const button2Text = element.button2 || 'Button 2';
+  const button3Text = element.button3 || 'Button 3';
+
+  return `
+
+
+    const ButtonSet = () => {
+      const styles = ${styles}; // Component styles
+
+      return (
+        <section
+          style={styles}
+          className="flex flex-col items-center justify-center text-center py-16 relative"
+        >
+          <div className="flex gap-4">
+            <div
+              className="bg-transparent text-black py-2 px-4 rounded-md hover:bg-primary-dark border border-black"
+              role="button"
+              tabIndex={0}
+              aria-label="Button 1"
+            >
+              ${button1Text}
+            </div>
+            <div
+              
+              className="bg-transparent text-black py-2 px-4 rounded-md hover:bg-primary-dark border border-black"
+              role="button"
+              tabIndex={0}
+              aria-label="Button 2"
+            >
+              ${button2Text}
+            </div>
+            <div
+              
+              className="bg-transparent text-black py-2 px-4 rounded-md hover:bg-primary-dark border border-black"
+              role="button"
+              tabIndex={0}
+              aria-label="Button 3"
+            >
+              ${button3Text}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    export default ButtonSet;
+  `;
+};
+
+
 export default ButtonSet;

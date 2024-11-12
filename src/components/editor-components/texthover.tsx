@@ -214,4 +214,71 @@ const Texthover = (props: Props) => {
   );
 };
 
+
+export const generateTexthoverCode = (element: EditorElement) => {
+  const conceptCode = `
+    switch (concept) {
+      case 'concept-one':
+        return (
+          <div className="concept concept-one">
+            {[...Array(9)].map((_, i) => (
+              <div key={i} className={\`hover hover-\${i + 1}\`}></div>
+            ))}
+            <h1>{${JSON.stringify(element.conceptText || 'Desert')}}</h1>
+          </div>
+        );
+      case 'concept-two':
+        return (
+          <div className="concept concept-two">
+            {['F', 'O', 'R', 'E', 'S', 'T'].map((val, index) => (
+              <div key={index} className={\`hover hover-\${index + 1}\`}>
+                <h1>{${JSON.stringify(element.conceptText || 'Forest')}}</h1>
+              </div>
+            ))}
+          </div>
+        );
+      case 'concept-three':
+        return (
+          <div className="concept concept-three">
+            {['S', 'U', 'N', 'S', 'H', 'I', 'N', 'E'].map((val, index) => (
+              <div key={index} className={\`hover hover-\${index + 1}\`}>
+                <h1>{${JSON.stringify(element.conceptText || 'Sunshine')}}</h1>
+              </div>
+            ))}
+          </div>
+        );
+      case 'concept-four':
+        return (
+          <div className="concept concept-four">
+            {['C', 'L', 'O', 'U', 'D'].map((val, index) => (
+              <div key={index} className={\`hover hover-\${index + 1}\`}>
+                <h1>{${JSON.stringify(element.conceptText || 'Cloud')}}</h1>
+              </div>
+            ))}
+          </div>
+        );
+      // Add more concepts as needed...
+      default:
+        return null;
+    }
+  `;
+
+  return `
+    const Texthover = () => {
+      const styles = ${JSON.stringify(element.styles)};
+    
+      return (
+        <section style={styles}>
+          <div className="main-content">
+            ${conceptCode}
+          </div>
+        </section>
+      );
+    };
+  
+    export default Texthover;
+  `;
+};
+
+
 export default Texthover;

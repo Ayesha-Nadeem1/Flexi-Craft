@@ -1,3 +1,4 @@
+
 'use client'
 import { Button } from '../components/ui/button'
 import { useEditor } from './editor-provider'
@@ -5,6 +6,52 @@ import clsx from 'clsx'
 import { EyeOff } from 'lucide-react'
 import React, { useEffect } from 'react'
 import Component_distributor from '../components/editor-components/component_distributor'
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver'
+import { generatecontactCode } from '../components/editor-components/contact-form'  // Import generateCode
+import { text } from 'stream/consumers'
+import { EditorElement } from './editor-provider'
+import { EditorBtns } from './const'
+import { generatebuttonCode } from '../components/editor-components/Button' 
+import { generateValuePropositionCode } from '../components/editor-components/value'
+import { generateMediaComponentCode } from '../components/editor-components/vid'
+import { generateTexthoverCode } from '../components/editor-components/texthover'
+import { generateTextComponentCode } from '../components/editor-components/text'
+import { generateTestimonialComponentCode } from '../components/editor-components/testimonial'
+import { generateTCCode } from '../components/editor-components/tc'
+import { exportToCodesteps } from '../components/editor-components/steps'
+import { exportTosmCode } from '../components/editor-components/sm'
+import { exportTosuCode } from '../components/editor-components/Sign up'
+import { exportTosiCode } from '../components/editor-components/Sign In'
+import { exportTosearchCode } from '../components/editor-components/Search'
+import { exportToloadCode } from '../components/editor-components/loading'
+import { exportTonavCode } from '../components/editor-components/navs'
+import { exportToLaserAnimationCode } from '../components/editor-components/lasers'
+import { exportToInputCode } from '../components/editor-components/input'
+import { exportToHeroSectionCode } from '../components/editor-components/hero'
+import { exportToHeaderComponentCode } from '../components/editor-components/header'
+import { exportToTextAnimationCode } from '../components/editor-components/greetings'
+import { exportToGridAndCardsCode } from '../components/editor-components/GD'
+import { exportToFooterComponentCode } from '../components/editor-components/footer'
+import { exportToFeaturesSectionCode } from '../components/editor-components/features'
+import { exportToCheckoutCode } from '../components/editor-components/checkout'
+import { exportToButtonSetCode } from '../components/editor-components/buttonset'
+import { exportToAnimationSetCode } from '../components/editor-components/animations'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 type Props = { liveMode?: boolean }
 
@@ -46,6 +93,236 @@ const EditorContent = ({ liveMode }: Props) => {
     dispatch({ type: 'TOGGLE_LIVE_MODE' })
   }
 
+  const exportToCode = () => {
+    if (state.editor.elements.length === 0) {
+      window.alert("No components on canvas");
+      return;
+    }
+  
+    const zip = new JSZip();
+  
+    // Log the elements to check their structure
+    console.log(state.editor.elements);
+  
+    // Iterate through the elements and generate the code for each component
+    state.editor.elements.forEach((element) => {
+      let componentCode = '';
+  
+      // Check the type of the element and generate the code accordingly
+      switch (element.type) {
+        case '__body':  // Main Body component
+          componentCode = generateBodyCode(element);
+          break;
+        case 'contactForm':
+          componentCode = generatecontactCode(element);  // Handle contact form
+          break;
+        case 'button':
+          componentCode = generatebuttonCode(element); 
+          break;
+        case 'value':
+            componentCode = generateValuePropositionCode(element); 
+          break;
+        case 'video':
+            componentCode = generateMediaComponentCode(element);
+          break;
+       case 'texthover':
+            componentCode = generateTexthoverCode(element);
+          break;
+       case 'text':
+              componentCode = generateTextComponentCode(element);
+          break;
+       case 'testimonial':
+              componentCode = generateTestimonialComponentCode(element);
+          break;
+      case 'tc':
+              componentCode = generateTCCode(element);
+          break;
+      case 'steps':
+              componentCode = exportToCodesteps(element);
+          break;
+      case 'sm':
+              componentCode = exportTosmCode(element);
+          break;
+      case 'signup':
+              componentCode = exportTosuCode(element);
+          break;
+      case 'signin':
+              componentCode = exportTosiCode(element);
+          break;
+      case 'search':
+              componentCode = exportTosearchCode(element);
+          break;
+      case 'loading':
+              componentCode = exportToloadCode(element);
+          break;
+      case 'navbars':
+              componentCode = exportTonavCode(element);
+          break;
+      case 'lasers':
+              componentCode = exportToLaserAnimationCode(element);
+          break;
+      case 'inputfield':
+              componentCode = exportToInputCode(element);
+          break;
+      case 'hero':
+              componentCode = exportToHeroSectionCode(element);
+          break;
+      case 'header':
+              componentCode = exportToHeaderComponentCode(element);
+          break;
+      case 'greetings':
+              componentCode = exportToTextAnimationCode(element);
+          break;
+      case 'gridsandcards':
+              componentCode = exportToGridAndCardsCode(element);
+          break;
+      case 'footer':
+              componentCode = exportToFooterComponentCode(element);
+          break;
+      case 'features':
+              componentCode = exportToFeaturesSectionCode(element);
+          break;
+      case 'paymentForm':
+              componentCode = exportToCheckoutCode(element);
+          break;
+      case 'buttonset':
+              componentCode = exportToButtonSetCode(element);
+          break;
+      case 'cartoons':
+              componentCode = exportToAnimationSetCode(element);
+
+              
+
+              
+
+
+              
+
+              
+
+                
+
+
+              
+
+
+              
+
+              
+              
+              
+
+              
+
+
+              
+
+
+
+        default:
+          componentCode = `<div>${element.name}</div>`;  // Default case if type doesn't match any known type
+      }
+  
+      // If no code was generated for the element, log it for debugging
+      if (!componentCode) {
+        console.log(`No code generated for element: ${JSON.stringify(element)}`);
+      }
+  
+      zip.file(`${element.name}.jsx`, componentCode);
+    });
+  
+    zip.generateAsync({ type: 'blob' }).then((content) => {
+      saveAs(content, 'React-components.zip');
+    });
+  };
+  
+
+
+
+
+
+
+
+  
+
+
+// Adjust the generateBodyCode function to handle only the elements needed
+const generateBodyCode = (element: EditorElement) => {
+  const bodyContent = element.content.map((childElement: EditorElement) => {
+    switch (childElement.type) {
+      case 'contactForm':
+        return generatecontactCode(childElement); // Generates the correct ContactForm JSX
+      case 'button':
+          return generatebuttonCode(childElement); 
+      case 'value':
+          return generateValuePropositionCode(childElement);
+      case 'video':
+            return generateMediaComponentCode(childElement);  
+      case 'texthover':
+            return generateTexthoverCode(childElement);
+      case 'text':
+            return generateTextComponentCode(childElement);
+      case 'testimonial':
+              return generateTestimonialComponentCode(childElement);
+      case 'tc':
+              return generateTCCode(childElement);
+      case 'steps':
+              return exportToCodesteps(childElement);
+      case 'sm':
+              return exportTosmCode(childElement);
+      case 'signup':
+              return exportTosuCode(childElement);
+      case 'signin':
+              return exportTosiCode(childElement);
+      case 'search':
+              return exportTosearchCode(childElement);
+      case 'loading':
+             return exportToloadCode(childElement);
+      case 'navbars':
+              return exportTonavCode(childElement);
+      case 'lasers':
+              return exportToLaserAnimationCode(childElement);
+      case 'inputfield':
+              return exportToInputCode(childElement);
+      case 'hero':
+              return exportToHeroSectionCode(childElement);
+      case 'header':
+              return exportToHeaderComponentCode(childElement);
+      case 'greetings':
+              return exportToTextAnimationCode(childElement);
+      case 'gridsandcards':
+              return exportToGridAndCardsCode(childElement);
+      case 'footer':
+              return exportToFooterComponentCode(childElement);
+      case 'features':
+              return exportToFeaturesSectionCode(childElement);
+      case 'paymentForm':
+              return exportToCheckoutCode(childElement);
+      case 'buttonset':
+              return exportToButtonSetCode(childElement);
+      case 'cartoons':
+              return exportToAnimationSetCode(childElement);
+  
+  
+                
+
+
+  
+      default:
+        return ''; // Only add specific elements you want in the output
+    }
+  }).join('\n');  // Ensures there's no leftover Link component
+  
+  return `
+import React from 'react';
+  ${bodyContent}`;
+};
+
+
+  
+
+
+
   return (
     <div
       className={clsx(
@@ -61,15 +338,29 @@ const EditorContent = ({ liveMode }: Props) => {
       onClick={handleClick}
     >
       {state.editor.previewMode && state.editor.liveMode && (
+      <div className="absolute top-0 left-0 z-[100]">
         <Button
           variant={'ghost'}
           size={'icon'}
-          className="w-6 h-6 bg-slate-600 p-[2px] fixed top-0 left-0 z-[100]"
+          className="w-6 h-6 bg-slate-600 p-[2px] mb-2"
           onClick={handleUnpreview}
         >
           <EyeOff />
+
+          <div className="absolute top-0 left-0 right-1 z-[100] p-6">
+        <Button
+          size={'icon'}
+          className="mb-2"
+          onClick={exportToCode}>
+          Code
         </Button>
-      )}
+      </div>
+        </Button>
+      </div>
+    )}
+
+
+
       {Array.isArray(state.editor.elements) &&
         state.editor.elements.map((childElement) => (
           <Component_distributor
@@ -77,8 +368,12 @@ const EditorContent = ({ liveMode }: Props) => {
             element={childElement}
           />
         ))}
+
     </div>
   )
 }
+
+
+
 
 export default EditorContent

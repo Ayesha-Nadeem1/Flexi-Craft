@@ -128,4 +128,39 @@ const ContactFormComponent = (props: Props) => {
   )
 }
 
-export default ContactFormComponent
+
+export const generatecontactCode = (element: EditorElement) => {
+  return `
+
+const ContactForm = () => {
+
+  const onFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    toast({
+      title: 'Form Submitted',
+      description: 'Thank you for contacting us. We will get back to you soon.',
+    })
+  }
+
+  return (
+    <div style={styles} className="contact-form">
+      <form onSubmit={onFormSubmit}>
+        <label htmlFor="first-name">First name</label>
+        <input type="text" name="first-name" required />
+        <label htmlFor="last-name">Last name</label>
+        <input type="text" name="last-name" required />
+        <label htmlFor="email">Email</label>
+        <input type="email" name="email" required />
+        <label htmlFor="message">Message</label>
+        <textarea name="message" rows="4" required></textarea>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  );
+}
+
+export default ContactForm;
+  `;
+};
+
+export default ContactFormComponent;

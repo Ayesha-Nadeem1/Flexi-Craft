@@ -102,4 +102,48 @@ const HeroSection = (props: Props) => {
   );
 };
 
+
+export const exportToHeroSectionCode = (element: EditorElement) => {
+  const heroTitle = JSON.stringify(element.herotitle || 'Your Main Heading Here');
+  const heroTagline = JSON.stringify(element.herotagline || 'Your compelling subheading goes here.');
+  const styles = JSON.stringify(element.styles);
+
+  return `
+    const HeroSection = () => {
+      const styles = ${styles};
+
+      return (
+        <section style={styles} className="flex flex-col items-center justify-center text-center py-16 relative">
+          <h1
+  
+            className="text-4xl font-bold mb-4"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(${heroTitle}),
+            }}
+          />
+          <p
+        
+            className="text-xl mb-8"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(${heroTagline}),
+            }}
+          />
+          <div className="flex gap-6">
+            <a href="#learn-more" className="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark">
+              Learn More
+            </a>
+            <a href="#learn-more" className="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark">
+              Get In Touch
+            </a>
+          </div>
+        </section>
+      );
+    };
+
+    export default HeroSection;
+  `;
+};
+
+
+
 export default HeroSection;

@@ -121,4 +121,37 @@ const ValuePropositionSection = (props: Props) => {
   );
 };
 
+
+export const generateValuePropositionCode = (element: EditorElement) => {
+  const valueKeys = ['value1', 'value2', 'value3', 'value4'];
+  const valueCode = valueKeys.map((valueKey, index) => {
+    return `
+      <div key={${index}} className="p-6 border rounded-lg bg-white shadow-md">
+        <h3>{${JSON.stringify(element[valueKey] || `Core Value ${index + 1}`)}}</h3>
+        <p>{${JSON.stringify(element[`${valueKey}Description`] || 'Description of core value.')}}</p>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    const ValueProposition = () => {
+      const styles = ${JSON.stringify(element.styles)};
+    
+      return (
+        <section style={styles}>
+          <h2>{${JSON.stringify(element.ftitle || 'Your Value Proposition Title')}}</h2>
+          <p>{${JSON.stringify(element.fdescription || 'A compelling description of the value you offer to your customers.')}}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            ${valueCode}
+          </div>
+        </section>
+      );
+    };
+  
+    export default ValueProposition;
+  `;
+};
+
+
+
 export default ValuePropositionSection;

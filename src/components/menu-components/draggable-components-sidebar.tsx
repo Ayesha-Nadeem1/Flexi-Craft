@@ -36,6 +36,9 @@ import TCPlaceholder from './tc-placeholder'
 import StepsPlaceholder from './steps-placeholder'
 import SMPlaceholder from './sm-placeholder'
 import StackPlaceholder from './stack-placeholder'
+import SigninPlaceholder from './signin-placeholder'
+import SignupPlaceholder from './signup-section-placeholder'
+
 
 
 type Props = {}
@@ -89,11 +92,12 @@ const ComponentsTab = (props: Props) => {
       id: 'features',
       group: 'landing page elements',
     },
-    /*  Component: <FooterPlaceholder />,
+    { 
+      Component: <FooterPlaceholder />,
       label: 'Footer',
       id: 'footer',
       group: 'landing page elements',
-    },*/
+    },
     {
       Component: <CartoonPlaceholder />,
       label: 'Animations',
@@ -220,12 +224,19 @@ const ComponentsTab = (props: Props) => {
       id: 'sm',
       group: 'Advanced-elements',
     },
-    //{
-    //  Component: <LinkPlaceholder />,
-    //  label: 'Link',
-    //  id: 'link',
-    //  group: 'Basic elements',
-    //},
+    {
+      Component: <SigninPlaceholder />,
+      label: 'Sign In',
+      id: 'signin',
+      group: 'Advanced-elements',
+    },
+    {
+      Component: <SignupPlaceholder />,
+      label: 'Sign Up',
+      id: 'signup',
+      group: 'Advanced-elements',
+    },
+
   ]
 
   return (

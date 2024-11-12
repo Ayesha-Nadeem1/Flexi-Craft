@@ -199,4 +199,85 @@ const MediaComponent = (props: Props) => {
   );
 };
 
+
+export const generateMediaComponentCode = (element: EditorElement) => {
+  return `
+
+    const MediaComponent = () => {
+      const [mediaUrl, setMediaUrl] = useState('${element.mediaUrl || ''}');
+      const [imageWidth, setImageWidth] = useState('${element.imageWidth || '100%'}');
+      const [imageHeight, setImageHeight] = useState('${element.imageHeight || 'auto'}');
+      const styles = ${JSON.stringify(element.styles)};
+      
+      const convertToEmbedUrl = (url) => {
+        const youtubeMatch = url.match(/(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([a-zA-Z0-9_-]{11})/);
+        if (youtubeMatch) {
+          return \`https://www.youtube.com/embed/\${youtubeMatch[1]}\`;
+        }
+        return url;
+      };
+
+      const isImageUrl = (url) => /\.(jpeg|jpg|gif|png|webp|bmp|svg|tiff|ico)$/.test(url) || url.includes('images?q=');
+      
+      const handleUrlChange = (e) => {
+        const url = e.target.value;
+        setMediaUrl(convertToEmbedUrl(url));
+      };
+      
+      const handleWidthChange = (e) => {
+        setImageWidth(e.target.value);
+      };
+      
+      const handleHeightChange = (e) => {
+        setImageHeight(e.target.value);
+      };
+
+      return (
+        <div style={styles} className="p-[2px] w-full m-[5px] relative text-[16px] transition-all flex items-center justify-center">
+          <input
+            type="text"
+            value={mediaUrl}
+            onChange={handleUrlChange}
+            className="absolute top-0 left-0 w-full p-2 bg-white border border-gray-300 rounded-lg"
+            placeholder="Enter media URL"
+          />
+          {isImageUrl(mediaUrl) && (
+            <div className="absolute top-12 left-0 w-full p-2 bg-white border border-gray-300 rounded-lg">
+              <label className="mr-2">Width:</label>
+              <input
+                type="text"
+                value={imageWidth}
+                onChange={handleWidthChange}
+                className="w-16 p-1 mr-4"
+              />
+            </div>
+          )}
+          {isImageUrl(mediaUrl) ? (
+            <img
+              src={mediaUrl}
+              alt="Loaded media"
+              style={{
+                width: imageWidth,
+                height: imageHeight,
+                objectFit: 'cover',
+              }}
+            />
+          ) : (
+            <iframe
+              width="${element.styles.width || '560'}"
+              height="${element.styles.height || '315'}"
+              src={mediaUrl}
+              title="Media player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            />
+          )}
+        </div>
+      );
+    };
+
+    export default MediaComponent;
+  `;
+};
+
+
 export default MediaComponent;

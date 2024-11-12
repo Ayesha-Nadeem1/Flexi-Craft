@@ -30,6 +30,10 @@ import StepsSection from './steps';
 import SMSection from './sm';
 import ImageComponent from './img';
 import Stack from './stack';
+import SignIn from './Sign In';
+import SignUp from './Sign up';
+
+
 
 // Use React.memo to optimize re-renders by memoizing components
 const Component_distributor = React.memo(({ element }: { element: EditorElement }) => {
@@ -98,6 +102,10 @@ const Component_distributor = React.memo(({ element }: { element: EditorElement 
       return <ImageComponent element={element} />;
     case 'stack':
       return <Stack element={element} />;
+    case 'signin':
+        return <SignIn element={element} />;
+    case 'signup':
+          return <SignUp element={element} />;
     default:
       return null;
   }

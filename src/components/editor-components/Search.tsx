@@ -100,4 +100,55 @@ const SearchComponent: React.FC<{ element: EditorElement }> = ({ element }) => {
   )
 }
 
+export const exportTosearchCode = (element: EditorElement) => {
+
+  const code = `
+    const SearchComponent = () => {
+
+      const styles = { ...element.styles };
+
+      return (
+        <div
+          style={styles}
+          className="relative flex items-center justify-center p-4 bg-gray-100 rounded-lg shadow-md"
+        >
+          <div className="relative w-full max-w-md">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search..."
+              className="w-full py-2 px-4 pr-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-300"
+              style={{ backgroundColor: bgColor }}
+            />
+            <button
+              className="absolute top-0 right-0 mt-2 mr-3 text-gray-500"
+              aria-label="Search"
+              type="button"
+              onClick={handleSearch}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M21 21l-4.35-4.35M16.64 11.5a5.14 5.14 0 11-10.28 0 5.14 5.14 0 0110.28 0z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      );
+    };
+  `;
+  return code;
+};
+
+
 export default SearchComponent

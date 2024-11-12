@@ -219,4 +219,158 @@ const TabsAndAccordions: React.FC<{ element: EditorElement }> = ({ element }) =>
   );
 };
 
+
+
+
+
+export const generateTCCode = (element: EditorElement) => {
+  // Only include user-made changes, using default values for other properties
+  const tabs = element.tabs || ['Tab 1', 'Tab 2', 'Tab 3'];
+  const tabContents = element.tabContents || ['Content for Tab 1', 'Content for Tab 2', 'Content for Tab 3'];
+  const tabHeading = element.tabHeading || 'Tabs';
+  const acbHeading = element.accordionHeading || 'Accordions';
+  const accordions = element.accordions || [
+    { title: 'Accordion 1', content: 'Content for Accordion 1', open: false },
+    { title: 'Accordion 2', content: 'Content for Accordion 2', open: false },
+    { title: 'Accordion 3', content: 'Content for Accordion 3', open: false },
+  ];
+
+  return `
+import React, { useState } from 'react';
+import clsx from 'clsx';
+
+const TabsAndAccordions = () => {
+  const [tabs, setTabs] = useState(${JSON.stringify(tabs)});
+  const [tabContents, setTabContents] = useState(${JSON.stringify(tabContents)});
+  const [activeTab, setActiveTab] = useState(0);
+  const [tabHeading, setTabHeading] = useState(${JSON.stringify(tabHeading)});
+  const [acbHeading, setACHeading] = useState(${JSON.stringify(acbHeading)});
+  const [accordions, setAccordions] = useState(${JSON.stringify(accordions)});
+
+  const handleDeleteTab = (index) => {
+    setTabs(tabs.filter((_, i) => i !== index));
+    setTabContents(tabContents.filter((_, i) => i !== index));
+    if (activeTab >= index) setActiveTab(Math.max(0, activeTab - 1));
+  };
+
+  const handleDeleteAccordion = (index) => {
+    setAccordions(accordions.filter((_, i) => i !== index));
+  };
+
+  const handleToggleAccordion = (index) => {
+    setAccordions(accordions.map((acc, i) =>
+      i === index ? { ...acc, open: !acc.open } : acc
+    ));
+  };
+
+  return (
+    <section style={{ ...element.styles }} className={clsx('relative p-4')}>
+      {/* Tabs */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">
+          <input
+            type="text"
+            value={tabHeading}
+            onChange={(e) => setTabHeading(e.target.value)}
+            className="bg-transparent border-none outline-none text-2xl font-bold mb-4"
+          />
+        </h2>
+        <div className="flex border-b border-gray-300 mb-4">
+          {tabs.map((tab, index) => (
+            <div key={index} className="relative flex items-center">
+              <button
+                className={clsx(
+                  'px-4 py-2 border-b-2',
+                  index === activeTab ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-600'
+                )}
+                onClick={() => setActiveTab(index)}
+              >
+                <input
+                  type="text"
+                  value={tab}
+                  onChange={(e) => {
+                    const newTabs = [...tabs];
+                    newTabs[index] = e.target.value;
+                    setTabs(newTabs);
+                  }}
+                  className="bg-transparent border-none outline-none"
+                />
+              </button>
+              <div className="absolute top-2 right-0 bg-red-500 px-2.5 py-1 text-xs font-bold rounded text-white cursor-pointer" onClick={() => handleDeleteTab(index)}>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="p-4 border border-gray-300">
+          <textarea
+            value={tabContents[activeTab]}
+            onChange={(e) => {
+              const newContents = [...tabContents];
+              newContents[activeTab] = e.target.value;
+              setTabContents(newContents);
+            }}
+            className="w-full bg-transparent border-none outline-none"
+            rows={4}
+          />
+        </div>
+      </div>
+
+      {/* Accordions */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">
+          <input
+            type="text"
+            value={acbHeading}
+            onChange={(e) => setACHeading(e.target.value)}
+            className="bg-transparent border-none outline-none text-2xl font-bold mb-4"
+          />
+        </h2>
+        {accordions.map((accordion, index) => (
+          <div key={index} className="relative border-b border-gray-300 mb-2">
+            <button
+              className="flex justify-between w-full px-4 py-2 text-left bg-gray-200 hover:bg-gray-300"
+              onClick={() => handleToggleAccordion(index)}
+            >
+              <input
+                type="text"
+                value={accordion.title}
+                onChange={(e) => {
+                  const newAccordions = [...accordions];
+                  newAccordions[index].title = e.target.value;
+                  setAccordions(newAccordions);
+                }}
+                className="bg-transparent border-none outline-none flex-grow"
+              />
+              <span>{accordion.open ? '-' : '+'}</span>
+            </button>
+            {accordion.open && (
+              <div className="p-4">
+                <textarea
+                  value={accordion.content}
+                  onChange={(e) => {
+                    const newAccordions = [...accordions];
+                    newAccordions[index].content = e.target.value;
+                    setAccordions(newAccordions);
+                  }}
+                  className="w-full bg-transparent border-none outline-none"
+                  rows={4}
+                />
+              </div>
+            )}
+            <div className="absolute top-2 right-2 bg-red-500 px-2.5 py-1 text-xs font-bold rounded text-white cursor-pointer" onClick={() => handleDeleteAccordion(index)}>
+
+          
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default TabsAndAccordions;
+  `;
+};
+
+
 export default TabsAndAccordions;

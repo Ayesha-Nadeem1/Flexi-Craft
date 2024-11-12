@@ -99,4 +99,46 @@ const InputComponent = (props: Props) => {
   )
 }
 
+
+export const exportToInputCode = (element: EditorElement) => {
+
+    return `
+
+   
+
+const InputComponent = () => {
+  const onFormSubmit = (e) => {
+    e.preventDefault();
+    toast({
+      title: 'Form Submitted',
+      description: 'Thank you for contacting us. We will get back to you soon.',
+    });
+  };
+
+  return (
+    <div className="border-none transition-all w-full">
+      <form onSubmit={onFormSubmit} className="flex flex-col gap-4 w-full">
+        <div className="mb-4">
+          <input
+            type="text"
+            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+            placeholder="Enter text"
+            required
+          />
+        </div>
+      </form>
+
+      <div className="absolute bg-primary px-2.5 py-1 text-xs font-bold -top-[25px] -right-[1px] rounded-none rounded-t-lg !text-white">
+        {/* Additional content can go here */}
+      </div>
+    </div>
+  );
+};
+
+export default InputComponent;
+
+    `;
+  };
+
+
 export default InputComponent

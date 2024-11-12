@@ -126,4 +126,54 @@ const HeaderComponent = (props: Props) => {
   );
 };
 
+
+export const exportToHeaderComponentCode = (element: EditorElement) => {
+  const headerTitle = JSON.stringify(element.htitle || 'Website Title');
+  const headerTagline = JSON.stringify(element.htagline || 'A brief tagline or description goes here.');
+  const styles = JSON.stringify(element.styles);
+
+  return `
+    const HeaderComponent = () => {
+      const [textColor, setTextColor] = useState<string>(${JSON.stringify(element.styles.color || '#000000')});
+
+
+      return (
+        <header style={{ ...${styles}, color: textColor }} className="p-4 w-full flex flex-col items-center text-gray-800 relative">
+          <h1
+
+            className="text-4xl font-bold mb-2"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(${headerTitle}),
+            }}
+          />
+          <p
+
+            className="text-lg mb-4"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(${headerTagline}),
+            }}
+          />
+          <nav className="flex gap-4">
+            <a href="#home" className="hover:underline">Home</a>
+            <a href="#about" className="hover:underline">About</a>
+            <a href="#services" className="hover:underline">Services</a>
+            <a href="#contact" className="hover:underline">Contact</a>
+          </nav>
+          <div className="absolute bottom-4 right-4">
+            <input
+              type="color"
+              value={textColor}
+              onChange={handleColorChange}
+              title="Change Text Color"
+            />
+          </div>
+        </header>
+      );
+    };
+
+    export default HeaderComponent;
+  `;
+};
+
+
 export default React.memo(HeaderComponent);

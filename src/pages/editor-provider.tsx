@@ -71,6 +71,14 @@ export type EditorElement = {
   accordions?: { title: string; content: string; open: boolean }[]; 
   stepHeading?: string; 
 
+  links?: { name: string; href: string }[];
+  orientation?: 'horizontal' | 'vertical';
+  navstyles?: {
+    color?: string;
+    backgroundColor?: string;
+    // other style properties...
+  };
+
 
 
 

@@ -139,4 +139,50 @@ const StepsSection: React.FC<{ element: EditorElement }> = ({ element }) => {
   );
 };
 
+
+export const exportToCodesteps = (element: EditorElement) => {
+  const stepsJSX = element.steps?.map((step, index) => `
+    <motion.div 
+      key={${index}} 
+      className="relative border-b border-gray-300 mb-4 pb-4 transition-transform" 
+      initial={{ opacity: 0, y: 20 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -20 }}
+    >
+      <input 
+        type="text" 
+        value={${JSON.stringify(step.title || `Step ${index + 1}`)}} 
+        onChange={(e) => handleStepChange(${index}, 'title', e.target.value)} 
+        className="bg-transparent border-none outline-none text-xl font-semibold mb-2 transition-colors hover:border-blue-500 focus:border-blue-500" 
+      />
+      <textarea 
+        value={${JSON.stringify(step.description || 'Description of this step.')}} 
+        onChange={(e) => handleStepChange(${index}, 'description', e.target.value)} 
+        className="w-full bg-transparent border-none outline-none transition-all resize-none" 
+        rows={4}
+      />
+    </motion.div>
+  `).join('');
+
+  return `
+    const StepsSection = () => {
+      const styles = ${JSON.stringify(element.styles)};
+      const stepHeading = ${JSON.stringify(element.stepHeading || 'Steps')};
+      
+      return (
+        <section style={styles} className="relative p-4 rounded-lg shadow-md transition-all">
+          <h2 className="text-2xl font-bold mb-4">
+            {${JSON.stringify(element.stepHeading || 'Steps')}}
+          </h2>
+          ${stepsJSX}
+        </section>
+      );
+    };
+  
+    export default StepsSection;
+  `;
+};
+
+
+
 export default StepsSection;

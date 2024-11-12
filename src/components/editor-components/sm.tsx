@@ -138,4 +138,28 @@ const SocialMediaIntegration: React.FC<{ element: EditorElement }> = ({ element 
   );
 };
 
+export const exportTosmCode = (element: EditorElement) => {
+
+  return `
+    <section
+      style={{ ...element.styles }}
+      className={clsx('relative p-4 rounded-lg shadow-lg')}
+    >
+      <div className="mt-4">
+        {socialMedia.map((item, index) => (
+          <SocialMediaButton
+            key={index}
+            platform={item.platform}
+            url={item.url}
+            onChange={(url) => handleChangeUrl(index, url)}
+            onDelete={() => handleDeleteButton(index)}
+            liveMode={state.editor.liveMode}
+          />
+        ))}
+      </div>
+    </section>
+  `;
+};
+
+
 export default SocialMediaIntegration;

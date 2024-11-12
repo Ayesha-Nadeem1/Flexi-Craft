@@ -110,4 +110,82 @@ const AnimationComponent: React.FC<Props> = ({ element }) => {
   );
 };
 
+
+
+export const exportToLaserAnimationCode = (element: EditorElement) => {
+  const { styles, id, name, content } = element;
+
+  const renderAnimation = (animation: string) => {
+    switch (animation) {
+      case 'lightning':
+        return `
+          <div className="lightning-container">
+            <div className="lightning white"></div>
+            <div className="lightning red"></div>
+          </div>
+        `;
+      case 'boom':
+        return `
+          <>
+            <div className="boom-container">
+              <div className="shape circle big white"></div>
+              <div className="shape circle white"></div>
+              <div className="shape triangle big yellow"></div>
+              <div className="shape disc white"></div>
+              <div className="shape triangle blue"></div>
+            </div>
+            <div className="boom-container second">
+              <div className="shape circle big white"></div>
+              <div className="shape circle white"></div>
+              <div className="shape disc white"></div>
+              <div className="shape triangle blue"></div>
+            </div>
+          </>
+        `;
+      default:
+        return null;
+    }
+  };
+
+  const animations = content ? content.map((item: any) => item.animation).filter(Boolean) : [];
+  const animationComponents = animations.map(renderAnimation).join('\n');
+
+  return `
+import './laser.css'; // Ensure you have a CSS file for styles
+
+const LaserAnimationComponent = () => {
+  return (
+    <div
+      className="animation-container"
+      style={{ ...{ /* styles here */ }}}
+    >
+      <div className="lightning-container">
+        <div className="lightning white"></div>
+        <div className="lightning red"></div>
+      </div>
+      <>
+        <div className="boom-container">
+          <div className="shape circle big white"></div>
+          <div className="shape circle white"></div>
+          <div className="shape triangle big yellow"></div>
+          <div className="shape disc white"></div>
+          <div className="shape triangle blue"></div>
+        </div>
+        <div className="boom-container second">
+          <div className="shape circle big white"></div>
+          <div className="shape circle white"></div>
+          <div className="shape disc white"></div>
+          <div className="shape triangle blue"></div>
+        </div>
+      </>
+    </div>
+  );
+};
+
+export default LaserAnimationComponent;
+
+  `;
+};
+
+
 export default AnimationComponent;

@@ -154,4 +154,28 @@ const TestimonialComponent: React.FC<Props> = (props) => {
   );
 };
 
+// Export Function for the Testimonial Component
+export const generateTestimonialComponentCode = (element: EditorElement) => {
+  return `
+    import React from 'react';
+
+    const TestimonialComponent = () => {
+      const imageUrl = '${element.imageUrl || ''}';
+      const styles = ${JSON.stringify(element.styles)};
+    
+      return (
+        <section style={styles}>
+          ${element.imageUrl ? `<img src="${element.imageUrl}" alt="User" className="w-16 h-16 rounded-full border-2 border-gray-300" />` : ''}
+          <div className="ml-4">
+            <p className="text-lg italic">${element.quote || 'This is a fantastic service!'}</p>
+            <p className="text-md font-semibold mt-2">${element.author || 'John Doe'}</p>
+          </div>
+        </section>
+      );
+    };
+  
+    export default TestimonialComponent;
+  `;
+};
+
 export default TestimonialComponent;
