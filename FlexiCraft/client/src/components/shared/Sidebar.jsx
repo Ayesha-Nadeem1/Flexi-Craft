@@ -20,7 +20,7 @@ export default function Sidebar() {
         <ul>
           <li><button onClick={() => handleClick('/dashboard')} className='flex flex-row lg:text-sm sm:text-md'><span><LayoutDashboard className='size-5 mr-2 mb-2'/></span>Dashboard</button></li>
           <li><button onClick={() => handleClick('/projects')} className='flex flex-row lg:text-sm sm:text-md'><span><Briefcase className='size-5 mr-2 mb-2'/></span>Projects</button></li>  
-          <li><button onClick={() => handleClick('/documentations')} className='flex flex-row lg:text-sm sm:text-md'><span><BookA className='size-5 mr-2 mb-2'/></span>Documentations</button></li>
+          {/* <li><button onClick={() => handleClick('/documentations')} className='flex flex-row lg:text-sm sm:text-md'><span><BookA className='size-5 mr-2 mb-2'/></span>Documentations</button></li> */}
           <li><button onClick={() => handleClick('/analytics')} className='flex flex-row lg:text-sm sm:text-md'><span><BarChartBig className='size-5 mr-2 mb-2'/></span>Analytics</button></li>   
           <li><button onClick={() => handleClick('/assetlibrary')} className='flex flex-row lg:text-sm sm:text-md'><span><Package className='size-5 mr-2 mb-2'/></span>Assest Library</button></li>
           <li><button onClick={() => handleClick('/componentslibrary')} className='flex flex-row lg:text-sm sm:text-md'><span><Layout className='size-5 mr-2 mb-2'/></span>Components Library</button></li>      
