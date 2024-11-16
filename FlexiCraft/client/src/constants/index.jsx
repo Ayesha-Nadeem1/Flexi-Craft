@@ -209,12 +209,12 @@ export const dashboardMainItems = [
     description:
       "Access comprehensive analytics to monitor your website's performance.",
   },
-  {
-    icon: <FaFileAlt className="text-purple-600 text-3xl" />,
-    heading: "Documentation Generator",
-    description:
-      "Generate LaTeX and PDF documentation for your projects with ease.",
-  },
+  // {
+  //   icon: <FaFileAlt className="text-purple-600 text-3xl" />,
+  //   heading: "Documentation Generator",
+  //   description:
+  //     "Generate LaTeX and PDF documentation for your projects with ease.",
+  // },
 ];
 
 export const headers = [
