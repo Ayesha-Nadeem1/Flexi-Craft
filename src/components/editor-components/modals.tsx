@@ -6,13 +6,15 @@ import React, { useState, useEffect } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import { Props } from './types'; 
+
 
 type ImageCarousel = {
   imageUrl: string;
   linkUrl?: string;
 };
 
-const CarouselAndSliders: React.FC<{ element: EditorElement }> = ({ element }) => {
+const CarouselAndSliders: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
   const [imageCarousels, setImageCarousels] = useState<ImageCarousel[]>(element.imageCarousels || [
     { imageUrl: '/images/image1.jpg' },

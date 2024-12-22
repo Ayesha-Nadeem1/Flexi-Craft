@@ -5,12 +5,8 @@ import { EditorElement, useEditor } from '../../pages/editor-provider'
 import { EditorBtns } from '../../pages/const'
 import clsx from 'clsx'
 import { Trash } from 'lucide-react'
-
 import React from 'react'
-
-type Props = {
-  element: EditorElement
-}
+import { Props } from './types'; 
 
 const InputComponent = (props: Props) => {
   const { dispatch, state} = useEditor()

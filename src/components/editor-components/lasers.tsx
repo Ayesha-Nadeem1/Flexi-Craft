@@ -6,10 +6,7 @@ import { Badge } from '../ui/badge'
 import { EditorElement, useEditor } from '../../pages/editor-provider'
 import { Trash } from 'lucide-react';
 import './laser.css'; // Ensure you have a CSS file for styles
-
-type Props = {
-  element: EditorElement;
-};
+import { Props } from './types'; 
 
 const AnimationComponent: React.FC<Props> = ({ element }) => {
   const { state } = useEditor();

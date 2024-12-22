@@ -6,10 +6,7 @@ import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 import DOMPurify from 'dompurify';  // Import DOMPurify
-
-type Props = {
-  element: EditorElement;
-};
+import { Props } from './types'; 
 
 // Type guard to check if content is an object
 const isContentObject = (content: any): content is { [key: string]: any } => {

@@ -6,10 +6,7 @@ import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import React, { useState } from 'react';
 import DOMPurify from 'dompurify';
-
-type Props = {
-  element: EditorElement;
-};
+import { Props } from './types'; 
 
 const TestimonialComponent: React.FC<Props> = (props) => {
   const { dispatch, state } = useEditor();

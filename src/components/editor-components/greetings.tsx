@@ -6,10 +6,7 @@ import { EditorElement, useEditor } from '../../pages/editor-provider'
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import './greetings.css';
-
-type Props = {
-  element: EditorElement;
-};
+import { Props } from './types'; 
 
 const TextAnimation: React.FC<Props> = ({ element }) => {
   const { state, dispatch } = useEditor();

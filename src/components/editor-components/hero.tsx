@@ -6,10 +6,8 @@ import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import React from 'react';
 import DOMPurify from 'dompurify';
+import { Props } from './types'; 
 
-type Props = {
-  element: EditorElement;
-};
 
 const HeroSection = (props: Props) => {
   const { dispatch, state } = useEditor();

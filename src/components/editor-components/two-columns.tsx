@@ -6,10 +6,7 @@ import clsx from 'clsx'
 import { EditorBtns, defaultStyles } from '../../pages/const'
 import { Badge } from '../ui/badge'
 import { EditorElement, useEditor } from '../../pages/editor-provider'
-
-type Props = {
-  element: EditorElement
-}
+import {Props} from './types'
 
 const TwoColumns = (props: Props) => {
   const { id, content, type } = props.element
@@ -120,9 +117,13 @@ const TwoColumns = (props: Props) => {
         content.map((childElement) => (
           <RecursiveElement
             key={childElement.id}
-            element={childElement}
-          />
+            element={childElement} onDrop={function (element: EditorElement): void {
+              throw new Error('Function not implemented.')
+            } } onDelete={function (elementId: string, element: EditorElement): void {
+              throw new Error('Function not implemented.')
+            } }            />
         ))}
+
     </div>
   )
 }

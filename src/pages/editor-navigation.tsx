@@ -18,7 +18,7 @@ import {
   Undo2,
 } from 'lucide-react'
 import React, { FocusEventHandler, useEffect } from 'react'
-import { toast } from 'sonner'
+import toast from 'react-hot-toast';
 
 // Removed Props type and related props from the component
 const EditorNavigation = () => {
@@ -43,9 +43,9 @@ const EditorNavigation = () => {
     try {
       localStorage.setItem('editorElements', content)
       console.log('Saved content:', content)
-      window.alert('Editor state saved successfully.')
+      toast.success('Editor state saved successfully.')
     } catch (error) {
-      window.alert('Failed to save editor state.')
+      toast('Failed to save editor state.')
     }
   }
 

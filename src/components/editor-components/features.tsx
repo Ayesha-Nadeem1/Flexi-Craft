@@ -6,10 +6,8 @@ import clsx from 'clsx';
 import { Trash, Star, Settings, PentagonIcon, Grid } from 'lucide-react';
 import React from 'react';
 import DOMPurify from 'dompurify'; // Make sure to install dompurify if you haven't
+import { Props } from './types'; 
 
-type Props = {
-  element: EditorElement;
-};
 
 const FeaturesSection = (props: Props) => {
   const { dispatch, state } = useEditor();

@@ -5,8 +5,10 @@ import { EditorElement, useEditor } from '../../pages/editor-provider'
 import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useState } from 'react'
+import { Props } from './types'; 
 
-const GridAndCards: React.FC<{ element: EditorElement }> = ({ element }) => {
+
+const GridAndCards: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor()
   const [cards, setCards] = useState(element.cards || [
     { title: 'Card 1', description: 'This is the first card.', imageUrl: 'https://via.placeholder.com/150' },

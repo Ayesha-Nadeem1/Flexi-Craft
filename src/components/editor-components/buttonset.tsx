@@ -5,10 +5,8 @@ import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import React from 'react';
+import { Props } from './types'; 
 
-type Props = {
-  element: EditorElement;
-};
 
 const ButtonSet: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();

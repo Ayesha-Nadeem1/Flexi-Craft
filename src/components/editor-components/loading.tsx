@@ -6,10 +6,7 @@ import { EditorElement, useEditor } from '../../pages/editor-provider'
 import clsx from 'clsx'
 import { Trash, X } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
-
-type Props = {
-  element: EditorElement
-}
+import { Props } from './types'; 
 
 const LoadingComponent = (props: Props) => {
   const { dispatch, state } = useEditor()

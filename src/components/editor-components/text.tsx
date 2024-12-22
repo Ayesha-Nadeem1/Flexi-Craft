@@ -4,21 +4,51 @@ import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
+import {Props} from './types'
+import { useSocket } from '../../SocketContext';  // Import the socket context
+import { useParams } from 'react-router-dom';
 
-type Props = {
-  element: EditorElement;
-};
+
 
 const TextComponent = (props: Props) => {
   const { dispatch, state } = useEditor();
+  const  socket  = useSocket(); 
+  const { roomId } = useParams();
   const [textContent, setTextContent] = useState<string>(props.element.texttitle || 'Sample Text'); // Contentoptimization
 
+  
+
+  
+  
   const handleDeleteElement = useCallback(() => {
-    dispatch({
-      type: 'DELETE_ELEMENT',
-      payload: { elementDetails: props.element },
+
+  //const updatedElements = state.editor.elements.filter(
+  //  (el) => el.id !== props.element.id
+  //);
+
+  //const updatedState = {
+  //  ...state.editor,
+  //  elements: updatedElements,
+  //};
+
+  dispatch({
+    type: 'DELETE_ELEMENT',
+    payload: { elementDetails: props.element },
+  });
+
+  setTimeout(() => {
+    const updatedElements = JSON.stringify(state.editor.elements); // Replace with Redux `getState` if available
+  
+    socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
     });
-  }, [dispatch, props.element]);
+  }, 0);
+
+  console.log("Component deleted:", roomId, props.element.id, props.element,state);
+
+}, [dispatch, props.element, socket, roomId]);
+
 
   const handleOnClickBody = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -28,6 +58,8 @@ const TextComponent = (props: Props) => {
         elementDetails: props.element,
       },
     });
+
+    //socket.emit('componentDropped', props.element);
   };
 
   const handleUpdateText = (e: React.FocusEvent<HTMLSpanElement>) => {
@@ -47,6 +79,11 @@ const TextComponent = (props: Props) => {
 
   const styles = props.element.styles;
 
+  const handleOnDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    socket.emit('componentDropped', props.element);
+  };
+
   return (
     <div
       style={styles}
@@ -60,6 +97,7 @@ const TextComponent = (props: Props) => {
         }
       )}
       onClick={handleOnClickBody}
+
     >
       {state.editor.selectedElement.id === props.element.id &&
         !state.editor.liveMode && (
@@ -71,6 +109,7 @@ const TextComponent = (props: Props) => {
         contentEditable={!state.editor.liveMode}
         suppressContentEditableWarning={true}
         onBlur={handleUpdateText}
+        onDrop={handleOnDrop}  
       >
         {textContent}
       </span>

@@ -7,12 +7,107 @@ import React from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import Recursive from './component_distributor'
 import { Trash } from 'lucide-react'
+import  { useEffect, useState, useRef } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Socket } from 'socket.io-client';
+import { useSocket } from '../../SocketContext';  // Import the socket context
 
-type Props = { element: EditorElement }
+
+
+
+type Props = { element: EditorElement 
+  onDrop: (element: EditorElement) => void;
+  onDelete: (elementId: string, element: EditorElement) => void;
+  
+}
 
 const Container = ({ element }: Props) => {
   const { id, content, name, styles, type } = element
   const { dispatch, state } = useEditor()
+  const  socket  = useSocket(); 
+  const [canvasComponents, setCanvasComponents] = useState<EditorElement[]>([]);  // State to store components on the canvas
+  const socketRef = useRef<Socket | null>(null);
+  const navigate = useNavigate();
+  const { roomId } = useParams();
+
+
+useEffect(() => {
+  const handleSyncState = ({ roomId, updatedElements }: { roomId: string; updatedElements: any }) => {
+    console.log(`Sync event received for Room ID: ${roomId}`, updatedElements);
+    console.log("Updated elements: ", updatedElements)
+
+    let parsedElements;
+    try {
+      parsedElements = typeof updatedElements === 'string' ? JSON.parse(updatedElements) : updatedElements;
+    } catch (err) {
+      console.error('Failed to parse updated elements:', err);
+      return;
+    }
+
+    console.log('Recent elements:', parsedElements);
+    dispatch({
+      type: 'LOAD_DATA_S',
+      payload: { elements: parsedElements },
+    });
+  };
+
+  socket.on('syncState', handleSyncState);
+
+  // Cleanup the listener on unmount
+  return () => {
+    socket.off('syncState', handleSyncState);
+  };
+}, [socket, dispatch]);
+
+
+
+  const handleComponentDrop = (componentData: EditorElement) => {
+    dispatch({
+      type: 'ADD_ELEMENT',
+      payload: { containerId: id, elementDetails: componentData },
+    });
+
+    setCanvasComponents((prev) => [...prev, componentData]);
+
+    // Emit to the server to notify others about the new component
+    if (socketRef.current && roomId) {
+      socketRef.current.emit('componentDropped', { roomId, componentData });
+    }
+  };
+
+  const handleComponentDelete = (componentId: string,componentData: EditorElement ) => {
+    dispatch({
+      type: 'DELETE_ELEMENT',
+      payload: {elementDetails: componentData},
+    });
+
+    setCanvasComponents((prev) => prev.filter((comp) => comp.id !== componentId));
+
+    // Emit to the server to notify others about the deletion
+    if (socketRef.current && roomId) {
+      socketRef.current.emit('componentDeleted', { roomId, componentId });
+    }
+  };
+
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.on('componentDropped', (componentData: any) => {
+        setCanvasComponents((prev) => [...prev, componentData]);
+      });
+
+      socketRef.current.on('componentDeleted', (componentId: string) => {
+        setCanvasComponents((prev) => prev.filter((comp) => comp.id !== componentId));
+      });
+    }
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off('componentDropped');
+        socketRef.current.off('componentDeleted');
+      }
+    };
+  }, [socketRef]);
+
 
   const handleOnDrop = (e: React.DragEvent, type: string) => {
     e.stopPropagation() //to prevent event bubbling
@@ -36,6 +131,17 @@ const Container = ({ element }: Props) => {
             },
           },
         })
+
+        setTimeout(() => {
+          const updatedElements = JSON.stringify(state.editor.elements); // Replace with Redux `getState` if available
+        
+          socket.emit('componentDropped', {
+            roomId,
+            updatedElements,
+          });
+        }, 0);
+
+
         break
       case 'link':
         dispatch({
@@ -664,6 +770,8 @@ break
           <Recursive
             key={childElement.id}
             element={childElement}
+            onDrop={handleComponentDrop} 
+            onDelete={handleComponentDelete} 
           />
         ))}
 

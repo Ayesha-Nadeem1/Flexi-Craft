@@ -5,10 +5,8 @@ import { EditorElement, useEditor } from '../../pages/editor-provider'
 import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useState } from 'react'
+import { Props } from './types'; 
 
-type Props = {
-  element: EditorElement
-}
 
 const GraphEditor: React.FC<Props> = (props) => {
   const { dispatch, state } = useEditor()

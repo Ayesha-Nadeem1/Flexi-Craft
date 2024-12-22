@@ -86,6 +86,7 @@ export type EditorElement = {
   name: string
   type: EditorBtns
   content: {
+    
 
 
     description?: string
@@ -237,6 +238,34 @@ const deleteAnElement = (
   })
 }
 
+const deleteElementForRoom = (
+  editorArray: EditorElement[],
+  action: EditorAction
+): EditorElement[] => {
+  if (action.type !== 'DELETE_ELEMENT_COLLAB')
+    throw Error(
+      'You sent the wrong action type to the Delete Element for Room State'
+    );
+
+  const { roomId, elementDetails } = action.payload;
+
+  return editorArray.filter((item) => {
+    // Check if the element belongs to the specified room and matches the component ID
+    console.log("dispatch delelemntroom idd", roomId)
+    if (item.roomId === roomId && item.id === elementDetails.id) {
+      return false; // Remove this item if it matches the criteria
+    } else if (item.content && Array.isArray(item.content)) {
+      // Recursively check the content if it's an array
+      item.content = deleteElementForRoom(item.content, action);
+    }
+    return true;
+  });
+};
+
+
+
+
+
 const editorReducer = (
   state: EditorState = initialState,
   action: EditorAction
@@ -327,6 +356,40 @@ const editorReducer = (
       }
       return deletedState
 
+    
+
+      case 'DELETE_ELEMENT_COLLAB':
+        // Perform the deletion logic for the specified room and component
+        const updatedElementsForRoom = deleteElementForRoom(state.editor.elements, action);
+      
+    
+        // Update the editor state with the deleted component
+        const updatedEditorStateAfterDelete_C = {
+            ...state.editor,
+            elements: updatedElementsForRoom,
+        };
+    
+        // Handle history update to allow undo/redo functionality
+        const updatedHistoryAfterDelete_C = [
+            ...state.history.history.slice(0, state.history.currentIndex + 1),
+            { ...updatedEditorStateAfterDelete_C }, // Save a copy of the updated state
+        ];
+    
+        // Prepare the new state after deletion
+        const deletedState_C = {
+            ...state,
+            editor: updatedEditorStateAfterDelete_C,
+            history: {
+                ...state.history,
+                history: updatedHistoryAfterDelete_C,
+                currentIndex: updatedHistoryAfterDelete_C.length - 1,
+            },
+        };
+    
+        return deletedState_C;
+    
+
+  
     case 'CHANGE_CLICKED_ELEMENT':
       const clickedState = {
         ...state,
@@ -424,6 +487,40 @@ const editorReducer = (
         },
       }
 
+
+      //case 'LOAD_UPDATED_STATE':
+      //  return {
+      //    ...state,
+      //   editor:{
+      //      ...initialState.editor,
+      //      elements: action.payload.elements || initialEditorState.elements
+      //    }, // Replace the editor state with the updated one
+      //  };
+
+        case 'LOAD_UPDATED_STATE': {
+          const { elements } = action.payload;
+          // Ensure the passed elements are valid
+          if (!elements || !Array.isArray(elements)) {
+            console.warn('No valid elements provided to sync.');
+            return state;
+          }
+        
+          return {
+            ...state,
+            editor: {
+              ...state.editor, // Keep other properties of the editor unchanged
+              elements, // Update the elements with the provided state
+            },
+            history: {
+              ...state.history,
+              history: [...state.history.history, { ...state.editor, elements }], // Add updated editor state to history
+              currentIndex: state.history.currentIndex + 1,
+            },
+          };
+        }
+        
+      
+    
     case 'LOAD_DATA_LS':
         return {
           ...initialState,
@@ -432,6 +529,31 @@ const editorReducer = (
             elements: action.payload.elements || initialEditorState.elements,
           },
         }
+
+
+
+      case 'LOAD_DATA_S': {
+          const { elements } = action.payload;
+        
+          // Validate elements
+          if (!Array.isArray(elements)) {
+            console.warn('Invalid elements payload for LOAD_DATA_LS.');
+            return state;
+          }
+        
+          return {
+            ...initialState,
+            editor: {
+              ...initialState.editor,
+              elements: elements || initialEditorState.elements,
+              // Reset selectedElement if it was deleted
+              selectedElement: elements.find((el) => el.id === state.editor.selectedElement.id)
+                ? state.editor.selectedElement
+                : initialEditorState.selectedElement,
+            },
+          };
+        }
+        
 
     case 'LOAD_DATA_TEMPLATE':
         return {

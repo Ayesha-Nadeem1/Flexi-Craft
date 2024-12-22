@@ -8,10 +8,8 @@ import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { DragEvent, MouseEvent } from 'react'
 import Recursive from './component_distributor'
+import {Props} from './types'
 
-type Props = {
-  element: EditorElement
-}
 
 const Stack = ({ element } : Props) => {
   const { id, content, name, styles, type } = element
@@ -625,12 +623,17 @@ break
         {name}
       </Badge>
 
-      {Array.isArray(content) &&
-        content.map((childElement) => (
-          <div key={childElement.id} style={{ position: 'absolute' }}>
-            <Recursive element={childElement} />
-          </div>
-        ))}
+      {content.map((childElement: EditorElement) => (
+        <div key={childElement.id} style={{ position: 'absolute' }}>
+          <Recursive
+            element={childElement} onDrop={function (element: EditorElement): void {
+              throw new Error('Function not implemented.')
+            } } onDelete={function (elementId: string, element: EditorElement): void {
+              throw new Error('Function not implemented.')
+            } }            />
+        </div>
+      ))}
+
 
 
       {state.editor.selectedElement.id === element.id &&

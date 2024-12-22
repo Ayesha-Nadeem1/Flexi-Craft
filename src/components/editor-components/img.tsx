@@ -6,10 +6,7 @@ import { EditorBtns } from '../../pages/const'
 import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useState } from 'react'
-
-type Props = {
-  element: EditorElement
-}
+import {Props} from './types'
 
 const ImageComponent = (props: Props) => {
   const { dispatch, state } = useEditor()

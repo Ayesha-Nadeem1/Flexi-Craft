@@ -7,10 +7,7 @@ import { EditorBtns } from '../../pages/const'
 import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
-
-type Props = {
-  element: EditorElement
-}
+import { Props } from './types'; 
 
 const Checkout = (props: Props) => {
   const { dispatch, state } = useEditor()

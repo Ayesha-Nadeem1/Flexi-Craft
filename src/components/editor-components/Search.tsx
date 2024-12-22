@@ -6,8 +6,10 @@ import { EditorElement, useEditor } from '../../pages/editor-provider'
 import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useState } from 'react'
+import { Props } from './types'; 
 
-const SearchComponent: React.FC<{ element: EditorElement }> = ({ element }) => {
+
+const SearchComponent: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor()
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [bgColor, setBgColor] = useState<string>('#ffffff')

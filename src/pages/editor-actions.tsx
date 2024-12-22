@@ -21,6 +21,12 @@ export type EditorAction =
       }
     }
   | {
+    type: 'DELETE_ELEMENT_COLLAB'
+    payload: {
+      roomId: string,
+      elementDetails: EditorElement
+    }
+  } | {
       type: 'CHANGE_CLICKED_ELEMENT'
       payload: {
         elementDetails?:
@@ -67,8 +73,27 @@ export type EditorAction =
   }
   |
 
+  
+  {
+      type: 'LOAD_UPDATED_STATE'
+      payload: {
+        elements: EditorElement[]
+      }
+    }
+    |
+
   {
     type: 'LOAD_DATA_TEMPLATE'
+    payload: {
+      elements: EditorElement[]
+    }
+  }
+  |
+
+  
+
+  {
+    type: 'LOAD_DATA_S'
     payload: {
       elements: EditorElement[]
     }

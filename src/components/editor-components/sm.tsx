@@ -5,6 +5,8 @@ import clsx from 'clsx';
 import React, { useState } from 'react';
 import { Trash } from 'lucide-react';
 import { FaTwitter, FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
+import { Props } from './types'; 
+
 
 type SocialMediaPlatform = 'twitter' | 'facebook' | 'instagram' | 'linkedin';
 
@@ -59,7 +61,7 @@ const SocialMediaButton: React.FC<SocialMediaButtonProps> = ({ platform, url, on
   );
 };
 
-const SocialMediaIntegration: React.FC<{ element: EditorElement }> = ({ element }) => {
+const SocialMediaIntegration: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
   const [socialMedia, setSocialMedia] = useState<{ platform: SocialMediaPlatform; url: string }[]>([
     { platform: 'twitter', url: '' },

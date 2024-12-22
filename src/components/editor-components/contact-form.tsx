@@ -7,10 +7,7 @@ import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 
 import React from 'react'
-
-type Props = {
-  element: EditorElement
-}
+import { Props } from './types'; 
 
 const ContactFormComponent = (props: Props) => {
   const { dispatch, state} = useEditor()

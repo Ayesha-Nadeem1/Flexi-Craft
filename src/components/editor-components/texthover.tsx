@@ -7,6 +7,8 @@ import { Trash } from 'lucide-react';
 import React, { useState } from 'react';
 import DOMPurify from 'dompurify'; // Import DOMPurify
 import './Animationtext.css';
+import { Props } from './types'; 
+
 
 type Concept = 
   | 'concept-one' 
@@ -17,9 +19,7 @@ type Concept =
   | 'concept-six' 
   | 'concept-seven';
 
-type Props = {
-  element: EditorElement;
-};
+
 
 const Texthover = (props: Props) => {
   const { dispatch, state } = useEditor();

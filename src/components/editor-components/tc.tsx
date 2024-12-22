@@ -5,8 +5,10 @@ import { EditorElement, useEditor } from '../../pages/editor-provider';
 import { Trash } from 'lucide-react';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
+import { Props } from './types'; 
 
-const TabsAndAccordions: React.FC<{ element: EditorElement }> = ({ element }) => {
+
+const TabsAndAccordions: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
   const [tabs, setTabs] = useState<string[]>(element.tabs || ['Tab 1', 'Tab 2', 'Tab 3']);
   const [tabContents, setTabContents] = useState<string[]>(element.tabContents || ['Content for Tab 1', 'Content for Tab 2', 'Content for Tab 3']);

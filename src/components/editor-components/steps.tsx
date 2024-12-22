@@ -6,8 +6,9 @@ import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { Trash } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Props } from './types'; 
 
-const StepsSection: React.FC<{ element: EditorElement }> = ({ element }) => {
+const StepsSection: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
 
 

@@ -1,17 +1,14 @@
 
 'use client'
 import { Button } from '../components/ui/button'
-import { useEditor } from './editor-provider'
 import clsx from 'clsx'
 import { EyeOff } from 'lucide-react'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Component_distributor from '../components/editor-components/component_distributor'
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver'
 import { generatecontactCode } from '../components/editor-components/contact-form'  // Import generateCode
-import { text } from 'stream/consumers'
-import { EditorElement } from './editor-provider'
-import { EditorBtns } from './const'
+import { EditorElement, useEditor } from './editor-provider'
 import { generatebuttonCode } from '../components/editor-components/Button' 
 import { generateValuePropositionCode } from '../components/editor-components/value'
 import { generateMediaComponentCode } from '../components/editor-components/vid'
@@ -37,26 +34,138 @@ import { exportToFeaturesSectionCode } from '../components/editor-components/fea
 import { exportToCheckoutCode } from '../components/editor-components/checkout'
 import { exportToButtonSetCode } from '../components/editor-components/buttonset'
 import { exportToAnimationSetCode } from '../components/editor-components/animations'
+import { useSocket } from '../SocketContext'; // Import the useSocket hook
+import { useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 
 
+type Props = {
+  liveMode?: boolean;
+  roomId: string;
+  element: EditorElement
+  
+};
+
+const EditorContent = ({ liveMode, element }: Props) => {
+  const socket = useSocket(); // Get socket instance from context
+
+  const ACTIONS = {
+    COMPONENT_DROPPED: 'componentDropped',
+    COMPONENT_DELETED: 'componentDeleted',
+};
 
 
-
-
-
-
-
-
-
-
-
-
-
-type Props = { liveMode?: boolean }
-
-const EditorContent = ({ liveMode }: Props) => {
+  const { id, content, name, styles, type } = element|| {};
   const { dispatch, state } = useEditor()
+  const navigate = useNavigate();
+  const { roomId } = useParams();
+
+
+
+  useEffect(() => {
+    if (!socket) {
+      console.error('Socket instance not available in EditorContent.');
+      return;
+    }
+
+    function handleErrors(e: any) {
+      console.log('Socket error:', e);
+      toast.error('Socket connection failed, try again later.');
+      navigate('/');
+    }
+
+    socket.on('connect_error', handleErrors);
+    socket.on('connect_failed', handleErrors);
+
+    return () => {
+      socket.off('connect_error', handleErrors);
+      socket.off('connect_failed', handleErrors);
+    };
+  }, [socket, roomId, navigate]);
+
+  useEffect(() => {
+    // Listen for component deletion events and handle all params
+      socket.on(ACTIONS.COMPONENT_DELETED, ({ roomId, componentData }: { roomId: string; componentData: any }) => {
+        toast.success("A user removed a component");
+    });
+
+    socket.on(ACTIONS.COMPONENT_DROPPED, ({ roomId, componentData }: { roomId: string; componentData: any }) => {
+      toast.success("A user dropped a component");
+  });
+    // Clean up the listener on unmount
+    return () => {
+        socket.off(ACTIONS.COMPONENT_DELETED);
+    };
+}, [socket, dispatch]);
+
+useEffect(() => {
+  const handleSyncState = ({ roomId, updatedElements }: { roomId: string; updatedElements: any }) => {
+    console.log(`Sync event received for Room ID: ${roomId}`, updatedElements);
+    console.log("Updated elements: ", updatedElements)
+
+    let parsedElements;
+    try {
+      parsedElements = typeof updatedElements === 'string' ? JSON.parse(updatedElements) : updatedElements;
+    } catch (err) {
+      console.error('Failed to parse updated elements:', err);
+      return;
+    }
+
+    console.log('Recent elements:', parsedElements);
+    dispatch({
+      type: 'LOAD_DATA_S',
+      payload: { elements: parsedElements },
+    });
+  };
+
+  socket.on('syncState', handleSyncState);
+
+  // Cleanup the listener on unmount
+  return () => {
+    socket.off('syncState', handleSyncState);
+  };
+}, [socket, dispatch]);
+
+
+
+
+
+  const handleComponentDrop = (element: EditorElement) => {
+    console.log('Handling component drop:', element);
+    dispatch({
+      type: 'ADD_ELEMENT',
+      payload: { containerId: id, elementDetails: element },
+    });
+
+    //setCanvasComponents((prev) => [...prev, element]);
+
+    // Emit to the server to notify others about the new component
+    if (socket && roomId) {
+      console.log('Emitting componentDropped:', { roomId, element });
+      socket.emit(ACTIONS.COMPONENT_DROPPED, { roomId, element });
+    }
+  };
+
+  const handleComponentDelete = (elementId: string, element: EditorElement) => {
+    console.log('EC componentDeleted');
+
+    dispatch({
+      type: 'DELETE_ELEMENT',
+      payload: { elementDetails: element },
+    });
+
+    //setCanvasComponents((prev) => prev.filter((comp) => comp.id !== elementId));
+
+    // Emit to the server to notify others about the deletion
+    if (socket && roomId) {
+      window.alert("Del from editor content")
+      console.log('Emitting componentDeleted:', { roomId, element, elementId });
+      socket.emit(ACTIONS.COMPONENT_DELETED, { roomId, elementId });
+    }
+  };
+
+
 
   useEffect(() => {
     if (liveMode) {
@@ -191,34 +300,6 @@ const EditorContent = ({ liveMode }: Props) => {
       case 'cartoons':
               componentCode = exportToAnimationSetCode(element);
 
-              
-
-              
-
-
-              
-
-              
-
-                
-
-
-              
-
-
-              
-
-              
-              
-              
-
-              
-
-
-              
-
-
-
         default:
           componentCode = `<div>${element.name}</div>`;  // Default case if type doesn't match any known type
       }
@@ -235,15 +316,7 @@ const EditorContent = ({ liveMode }: Props) => {
       saveAs(content, 'React-components.zip');
     });
   };
-  
 
-
-
-
-
-
-
-  
 
 
 // Adjust the generateBodyCode function to handle only the elements needed
@@ -303,11 +376,6 @@ const generateBodyCode = (element: EditorElement) => {
       case 'cartoons':
               return exportToAnimationSetCode(childElement);
   
-  
-                
-
-
-  
       default:
         return ''; // Only add specific elements you want in the output
     }
@@ -317,10 +385,6 @@ const generateBodyCode = (element: EditorElement) => {
 import React from 'react';
   ${bodyContent}`;
 };
-
-
-  
-
 
 
   return (
@@ -359,21 +423,19 @@ import React from 'react';
       </div>
     )}
 
-
-
-      {Array.isArray(state.editor.elements) &&
-        state.editor.elements.map((childElement) => (
-          <Component_distributor
-            key={childElement.id}
-            element={childElement}
-          />
-        ))}
+    {Array.isArray(state.editor.elements) && //if solo mode then state.editor.elements if collab then canvas
+            state.editor.elements.map((childElement) => (
+              <Component_distributor
+                key={childElement.id}
+                element={childElement}
+                onDrop={handleComponentDrop} 
+                onDelete={handleComponentDelete} 
+              
+              />
+            ))}
 
     </div>
   )
 }
-
-
-
 
 export default EditorContent

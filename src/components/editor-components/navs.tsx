@@ -5,10 +5,12 @@ import { EditorElement, useEditor } from '../../pages/editor-provider'
 import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useState } from 'react'
+import { Props } from './types'; 
+
 
 type NavbarType = 'horizontal' | 'vertical'
 
-const Navbar: React.FC<{ element: EditorElement }> = ({ element }) => {
+const Navbar: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor()
   const [links, setLinks] = useState<{ name: string; href: string }[]>([
     { name: 'Home', href: '#' },
