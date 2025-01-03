@@ -6,16 +6,30 @@ import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import React from 'react';
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 
 const ButtonSet: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
+  const socket = useSocket();
+  const { roomId } = useParams();
 
   const handleDeleteElement = () => {
     dispatch({
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: element },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {

@@ -7,16 +7,32 @@ import { Trash } from 'lucide-react';
 import React, { useState } from 'react';
 import DOMPurify from 'dompurify';
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
 
 const TestimonialComponent: React.FC<Props> = (props) => {
   const { dispatch, state } = useEditor();
   const [imageUrl, setImageUrl] = useState(props.element.imageUrl || '');
+  const socket = useSocket();
+  const { roomId } = useParams();
+
 
   const handleDeleteElement = () => {
     dispatch({
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {

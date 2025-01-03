@@ -33,76 +33,76 @@ import SignIn from './Sign In';
 import SignUp from './Sign up';
 
 // Use React.memo to optimize re-renders by memoizing components
-const Component_distributor = React.memo(({ element, onDrop, onDelete }: { element: EditorElement, onDrop: (element: EditorElement) => void, onDelete: (elementId: string, element: EditorElement) => void }) => {
+const Component_distributor = React.memo(({ element }: { element: EditorElement }) => {
   const renderComponent = () => {
-    console.log('Distributing Props:', { element, onDrop, onDelete }); // Debugging
+    console.log('Distributing Props:', { element }); // Debugging
     switch (element.type) {
       case 'text':
-        return <TextComponent element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <TextComponent element={element} />;
       case 'container':
-        return <Container element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Container element={element}  />;
       case 'video':
-        return <VideoComponent element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <VideoComponent element={element} />;
       case 'contactForm':
-        return <ContactFormComponent element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <ContactFormComponent element={element}  />;
       case 'paymentForm':
-        return <Checkout element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Checkout element={element} />;
       case '2Col':
-        return <Container element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Container element={element}  />;
       case '__body':
-        return <Container element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Container element={element} />;
       case 'inputfield':
-        return <InputComponent element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <InputComponent element={element}  />;
       case 'header':
-        return <HeaderComponent element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <HeaderComponent element={element}/>;
       case 'hero':
-        return <HeroSection element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <HeroSection element={element}  />;
       case 'value':
-        return <ValuePropositionSection element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <ValuePropositionSection element={element}  />;
       case 'testimonial':
-        return <TestimonialComponent element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <TestimonialComponent element={element} />;
       case 'features':
-        return <FeaturesSection element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <FeaturesSection element={element}  />;
       case 'footer':
-        return <FooterSection element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <FooterSection element={element}  />;
       case 'button':
-        return <ButtonSection element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <ButtonSection element={element}  />;
       case 'buttonset':
-        return <ButtonSet element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <ButtonSet element={element}  />;
       case 'loading':
-        return <Loading element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Loading element={element}  />;
       case 'cartoons':
-        return <Animations element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Animations element={element} />;
       case 'texthover':
-        return <Texthover element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Texthover element={element}  />;
       case 'greetings':
-        return <TextAnimation element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <TextAnimation element={element} />;
       case 'lasers':
-        return <Laser element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Laser element={element}  />;
       case 'graph':
-        return <Graphs element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Graphs element={element} />;
       case 'navbars':
-        return <NavbarEditor element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <NavbarEditor element={element} />;
       case 'gridsandcards':
-        return <GD element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <GD element={element}  />;
       case 'modals':
-        return <Modals element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Modals element={element}  />;
       case 'search':
-        return <SearchSection element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <SearchSection element={element}  />;
       case 'tc':
-        return <TabsAndAccordions element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <TabsAndAccordions element={element}  />;
       case 'steps':
-        return <StepsSection element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <StepsSection element={element}  />;
       case 'sm':
-        return <SMSection element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <SMSection element={element}  />;
       case 'urlimg':
-        return <ImageComponent element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <ImageComponent element={element} />;
       case 'stack':
-        return <Stack element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <Stack element={element}  />;
       case 'signin':
-        return <SignIn element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <SignIn element={element}  />;
       case 'signup':
-        return <SignUp element={element} onDrop={onDrop} onDelete={onDelete} />;
+        return <SignUp element={element}  />;
       default:
         return null;
     }

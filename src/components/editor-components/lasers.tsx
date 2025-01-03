@@ -7,14 +7,18 @@ import { EditorElement, useEditor } from '../../pages/editor-provider'
 import { Trash } from 'lucide-react';
 import './laser.css'; // Ensure you have a CSS file for styles
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 const AnimationComponent: React.FC<Props> = ({ element }) => {
-  const { state } = useEditor();
+  const { dispatch , state } = useEditor();
   const [animations, setAnimations] = useState([
     'lightning',
     'boom',
   ]);
   const [backgroundColor, setBackgroundColor] = useState<string>(element.styles.backgroundColor || '#ffffff');
+  const socket = useSocket();
+const { roomId } = useParams();
 
   const handleDeleteAnimation = (index: number) => {
     const updatedAnimations = animations.filter((_, i) => i !== index);
@@ -22,8 +26,20 @@ const AnimationComponent: React.FC<Props> = ({ element }) => {
   };
 
   const handleDeleteContainer = () => {
-    // Handle deletion of the container locally if needed
-  };
+    dispatch({
+      type: 'DELETE_ELEMENT',
+      payload: { elementDetails: element },
+    })
+
+    
+  setTimeout(() => {
+    const updatedElements = JSON.stringify(state.editor.elements);
+    
+    socket.emit('componentDeleted', {
+    roomId,
+    updatedElements,
+    });
+    }, 0);  };
 
   const handleOnClickBody = (e: React.MouseEvent) => {
     e.stopPropagation();

@@ -7,6 +7,8 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 
 type ImageCarousel = {
@@ -16,6 +18,8 @@ type ImageCarousel = {
 
 const CarouselAndSliders: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
+  const socket = useSocket();
+  const { roomId } = useParams();
   const [imageCarousels, setImageCarousels] = useState<ImageCarousel[]>(element.imageCarousels || [
     { imageUrl: '/images/image1.jpg' },
     { imageUrl: '/images/image2.jpg' },
@@ -48,6 +52,16 @@ const CarouselAndSliders: React.FC<Props> = ({ element }) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: element },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {

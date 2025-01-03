@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { FaSuperpowers } from 'react-icons/fa';
+import { FaEdit } from 'react-icons/fa';
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -40,8 +40,8 @@ const Home: React.FC = () => {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
-                <FaSuperpowers className="mx-auto text-blue-500" size={64} />
-                <h1 className="text-3xl font-semibold text-center text-gray-800 mt-4">Collab</h1>
+                <FaEdit className="mx-auto text-blue-500" size={64} />
+                <h1 className="text-3xl font-semibold text-center text-gray-800 mt-4">Editor</h1>
                 <h4 className="text-lg text-center text-gray-600 mt-2">Paste invitation ROOM ID</h4>
                 <div className="mt-6 space-y-4">
                     <input

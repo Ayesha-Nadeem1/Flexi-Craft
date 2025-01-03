@@ -8,6 +8,8 @@ import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 const Checkout = (props: Props) => {
   const { dispatch, state } = useEditor()
@@ -16,6 +18,10 @@ const Checkout = (props: Props) => {
   const [subAccountConnectAccId, setSubAccountConnectAccId] = useState('')
   const options = useMemo(() => ({ clientSecret }), [clientSecret])
   const styles = props.element.styles
+  
+  const socket = useSocket();
+  const { roomId } = useParams();
+
 
   const handleDragStart = (e: React.DragEvent, type: EditorBtns) => {
     if (type === null) return
@@ -37,6 +43,16 @@ const Checkout = (props: Props) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     })
+
+    
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
   }
 
   return (

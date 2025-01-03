@@ -7,11 +7,16 @@ import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useState } from 'react'
 import {Props} from './types'
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
 
 const ImageComponent = (props: Props) => {
   const { dispatch, state } = useEditor()
   const [imageUrl, setImageUrl] = useState<string>('')
   const styles = props.element.styles
+  const socket = useSocket();
+  const { roomId } = useParams();
 
   const handleDragStart = (e: React.DragEvent, type: EditorBtns) => {
     if (type === null) return
@@ -33,6 +38,17 @@ const ImageComponent = (props: Props) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     })
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+
+
   }
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {

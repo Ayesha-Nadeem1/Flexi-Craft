@@ -7,18 +7,33 @@ import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useState } from 'react'
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
 
 
 const SearchComponent: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor()
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [bgColor, setBgColor] = useState<string>('#ffffff')
+  const socket = useSocket();
+  const { roomId } = useParams();
 
   const handleDeleteContainer = () => {
     dispatch({
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: element },
     })
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
   }
 
   const handleOnClickBody = (e: React.MouseEvent) => {

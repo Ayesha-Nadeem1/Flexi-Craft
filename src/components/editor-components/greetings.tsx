@@ -7,10 +7,14 @@ import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import './greetings.css';
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 const TextAnimation: React.FC<Props> = ({ element }) => {
   const { state, dispatch } = useEditor();
   const [textColor, setTextColor] = useState(element.styles.color || '#000000');
+  const socket = useSocket();
+  const { roomId } = useParams();
 
   const handleOnClickBody = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -27,6 +31,18 @@ const TextAnimation: React.FC<Props> = ({ element }) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: element },
     });
+
+  setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
+
+
   };
 
   const handleTextColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {

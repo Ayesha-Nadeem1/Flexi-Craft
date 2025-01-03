@@ -7,16 +7,30 @@ import { Trash, Star, Settings, PentagonIcon, Grid } from 'lucide-react';
 import React from 'react';
 import DOMPurify from 'dompurify'; // Make sure to install dompurify if you haven't
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 
 const FeaturesSection = (props: Props) => {
   const { dispatch, state } = useEditor();
+  const socket = useSocket();
+  const { roomId } = useParams();
 
   const handleDeleteElement = () => {
     dispatch({
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {

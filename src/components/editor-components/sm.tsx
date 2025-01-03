@@ -6,6 +6,9 @@ import React, { useState } from 'react';
 import { Trash } from 'lucide-react';
 import { FaTwitter, FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
 
 
 type SocialMediaPlatform = 'twitter' | 'facebook' | 'instagram' | 'linkedin';
@@ -63,6 +66,8 @@ const SocialMediaButton: React.FC<SocialMediaButtonProps> = ({ platform, url, on
 
 const SocialMediaIntegration: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
+  const socket = useSocket();
+  const { roomId } = useParams();
   const [socialMedia, setSocialMedia] = useState<{ platform: SocialMediaPlatform; url: string }[]>([
     { platform: 'twitter', url: '' },
     { platform: 'facebook', url: '' },
@@ -75,6 +80,16 @@ const SocialMediaIntegration: React.FC<Props> = ({ element }) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: element },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {

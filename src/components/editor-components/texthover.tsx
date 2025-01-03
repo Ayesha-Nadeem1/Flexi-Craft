@@ -8,6 +8,8 @@ import React, { useState } from 'react';
 import DOMPurify from 'dompurify'; // Import DOMPurify
 import './Animationtext.css';
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 
 type Concept = 
@@ -23,6 +25,8 @@ type Concept =
 
 const Texthover = (props: Props) => {
   const { dispatch, state } = useEditor();
+  const socket = useSocket();
+  const { roomId } = useParams();
   const [concept, setConcept] = useState<Concept>('concept-one');
 
   const handleDeleteContainer = () => {
@@ -30,6 +34,15 @@ const Texthover = (props: Props) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {

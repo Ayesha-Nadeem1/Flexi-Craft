@@ -7,9 +7,16 @@ import React, { useEffect, useState } from 'react';
 import { Trash } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
 
 const StepsSection: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
+
+  
+  const socket = useSocket();
+  const { roomId } = useParams();
 
 
   const [steps, setSteps] = useState<{ title: string; description: string }[]>(element.steps || [
@@ -52,6 +59,18 @@ const StepsSection: React.FC<Props> = ({ element }) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: element },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
+
+
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {

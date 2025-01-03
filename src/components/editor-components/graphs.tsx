@@ -6,10 +6,14 @@ import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useState } from 'react'
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 
 const GraphEditor: React.FC<Props> = (props) => {
   const { dispatch, state } = useEditor()
+  const socket = useSocket();
+  const { roomId } = useParams();
   const [graphs, setGraphs] = useState([
     'lineChart',
     'barChart',
@@ -33,6 +37,16 @@ const GraphEditor: React.FC<Props> = (props) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     })
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+
   }
 
   const handleOnClickBody = (e: React.MouseEvent) => {

@@ -6,6 +6,9 @@ import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 import {Props} from './types'
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
 
 // Type guard to check if content is an object
 const isContentObject = (content: any): content is { [key: string]: any } => {
@@ -14,6 +17,8 @@ const isContentObject = (content: any): content is { [key: string]: any } => {
 
 const SignUpComponent = (props: Props) => {
   const { dispatch, state } = useEditor();
+  const socket = useSocket();
+  const { roomId } = useParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,6 +30,19 @@ const SignUpComponent = (props: Props) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
+
+
+
   }, [dispatch, props.element]);
 
   const handleOnClickBody = (e: React.MouseEvent) => {

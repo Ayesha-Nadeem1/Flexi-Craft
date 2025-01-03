@@ -7,6 +7,10 @@ import { Trash } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 import DOMPurify from 'dompurify'; // Import DOMPurify
 import {Props} from './types'
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
+
 // Type guard to check if content is an object
 const isContentObject = (content: any): content is { [key: string]: any } => {
   return typeof content === 'object' && !Array.isArray(content);
@@ -14,18 +18,30 @@ const isContentObject = (content: any): content is { [key: string]: any } => {
 
 const SignInComponent = (props: Props) => {
   const { dispatch, state } = useEditor();
+  const socket = useSocket();
+  const { roomId } = useParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [textColor, setTextColor] = useState<string>(props.element.styles.color || '#000000');
 
-  const handleDeleteElement = useCallback(() => {
+  const handleDeleteElement = () => {
     dispatch({
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     });
-  }, [dispatch, props.element]);
 
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+
+    };
+    
   const handleOnClickBody = (e: React.MouseEvent) => {
     e.stopPropagation();
     dispatch({

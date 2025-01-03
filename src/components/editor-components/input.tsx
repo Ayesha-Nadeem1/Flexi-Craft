@@ -7,9 +7,16 @@ import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React from 'react'
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
 
 const InputComponent = (props: Props) => {
   const { dispatch, state} = useEditor()
+  
+  const socket = useSocket();
+  const { roomId } = useParams();
+
 
 
   const handleDragStart = (e: React.DragEvent, type: EditorBtns) => {
@@ -34,6 +41,18 @@ const InputComponent = (props: Props) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     })
+
+    
+  setTimeout(() => {
+    const updatedElements = JSON.stringify(state.editor.elements);
+    
+    socket.emit('componentDeleted', {
+    roomId,
+    updatedElements,
+    });
+    }, 0);
+
+
   }
 
   const onFormSubmit = (e: React.FormEvent) => {

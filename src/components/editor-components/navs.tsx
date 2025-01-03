@@ -6,12 +6,17 @@ import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useState } from 'react'
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
 
 
 type NavbarType = 'horizontal' | 'vertical'
 
 const Navbar: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor()
+  const socket = useSocket();
+  const { roomId } = useParams();
   const [links, setLinks] = useState<{ name: string; href: string }[]>([
     { name: 'Home', href: '#' },
     { name: 'About', href: '#' },
@@ -33,6 +38,15 @@ const Navbar: React.FC<Props> = ({ element }) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: element },
     })
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
   }
 
   const handleOnClickBody = (e: React.MouseEvent) => {

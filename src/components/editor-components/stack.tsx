@@ -9,11 +9,16 @@ import { Trash } from 'lucide-react'
 import React, { DragEvent, MouseEvent } from 'react'
 import Recursive from './component_distributor'
 import {Props} from './types'
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 
 const Stack = ({ element } : Props) => {
   const { id, content, name, styles, type } = element
   const { dispatch, state } = useEditor()
+  const socket = useSocket();
+  const { roomId } = useParams();
+
 
   const handleOnDrop = (e: DragEvent<HTMLDivElement>) => {
     e.stopPropagation() //to prevent event bubbling
@@ -583,6 +588,17 @@ break
         elementDetails: element,
       },
     })
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+
+      
   }
 
   return (
@@ -626,11 +642,7 @@ break
       {content.map((childElement: EditorElement) => (
         <div key={childElement.id} style={{ position: 'absolute' }}>
           <Recursive
-            element={childElement} onDrop={function (element: EditorElement): void {
-              throw new Error('Function not implemented.')
-            } } onDelete={function (elementId: string, element: EditorElement): void {
-              throw new Error('Function not implemented.')
-            } }            />
+            element={childElement} />
         </div>
       ))}
 

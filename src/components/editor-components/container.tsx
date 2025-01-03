@@ -15,11 +15,7 @@ import { useSocket } from '../../SocketContext';  // Import the socket context
 
 
 
-type Props = { element: EditorElement 
-  onDrop: (element: EditorElement) => void;
-  onDelete: (elementId: string, element: EditorElement) => void;
-  
-}
+type Props = { element: EditorElement }
 
 const Container = ({ element }: Props) => {
   const { id, content, name, styles, type } = element
@@ -29,6 +25,10 @@ const Container = ({ element }: Props) => {
   const socketRef = useRef<Socket | null>(null);
   const navigate = useNavigate();
   const { roomId } = useParams();
+
+
+
+  
 
 
 useEffect(() => {
@@ -60,35 +60,6 @@ useEffect(() => {
 }, [socket, dispatch]);
 
 
-
-  const handleComponentDrop = (componentData: EditorElement) => {
-    dispatch({
-      type: 'ADD_ELEMENT',
-      payload: { containerId: id, elementDetails: componentData },
-    });
-
-    setCanvasComponents((prev) => [...prev, componentData]);
-
-    // Emit to the server to notify others about the new component
-    if (socketRef.current && roomId) {
-      socketRef.current.emit('componentDropped', { roomId, componentData });
-    }
-  };
-
-  const handleComponentDelete = (componentId: string,componentData: EditorElement ) => {
-    dispatch({
-      type: 'DELETE_ELEMENT',
-      payload: {elementDetails: componentData},
-    });
-
-    setCanvasComponents((prev) => prev.filter((comp) => comp.id !== componentId));
-
-    // Emit to the server to notify others about the deletion
-    if (socketRef.current && roomId) {
-      socketRef.current.emit('componentDeleted', { roomId, componentId });
-    }
-  };
-
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on('componentDropped', (componentData: any) => {
@@ -106,7 +77,21 @@ useEffect(() => {
         socketRef.current.off('componentDeleted');
       }
     };
-  }, [socketRef]);
+}, [socketRef]);
+
+
+  const emitComponentDropped = (socket :any, roomId : any, state: any) => {
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements); // Replace with Redux `getState` if available
+
+      socket.emit('componentDropped', {
+        roomId,
+        updatedElements,
+      });
+    }, 0);
+  };
+
+  
 
 
   const handleOnDrop = (e: React.DragEvent, type: string) => {
@@ -131,17 +116,7 @@ useEffect(() => {
             },
           },
         })
-
-        setTimeout(() => {
-          const updatedElements = JSON.stringify(state.editor.elements); // Replace with Redux `getState` if available
-        
-          socket.emit('componentDropped', {
-            roomId,
-            updatedElements,
-          });
-        }, 0);
-
-
+        emitComponentDropped(socket, roomId, state);
         break
       case 'link':
         dispatch({
@@ -180,6 +155,7 @@ useEffect(() => {
             },
           },
         })
+        emitComponentDropped(socket, roomId, state);
         break
       case 'container':
         dispatch({
@@ -210,6 +186,7 @@ useEffect(() => {
             },
           },
         })
+        emitComponentDropped(socket, roomId, state);
         break
       case 'paymentForm':
         dispatch({
@@ -225,6 +202,7 @@ useEffect(() => {
             },
           },
         })
+        emitComponentDropped(socket, roomId, state);
         break
 
       case 'inputfield':
@@ -241,6 +219,8 @@ useEffect(() => {
               },
             },
           })
+          emitComponentDropped(socket, roomId, state);
+
       break
 
       case 'header':
@@ -257,6 +237,8 @@ useEffect(() => {
             },
           },
         })
+        emitComponentDropped(socket, roomId, state);
+
     break
 
     case 'signup':
@@ -273,6 +255,8 @@ useEffect(() => {
           },
         },
       })
+      emitComponentDropped(socket, roomId, state);
+
   break
 
 
@@ -291,6 +275,7 @@ useEffect(() => {
         },
       },
     })
+    emitComponentDropped(socket, roomId, state);
 break
 
 
@@ -308,6 +293,7 @@ break
           },
         },
       })
+      emitComponentDropped(socket, roomId, state);
   break
 
   case 'value':
@@ -324,6 +310,7 @@ break
         },
       },
     })
+    emitComponentDropped(socket, roomId, state);
 break
 
 
@@ -341,6 +328,8 @@ case 'testimonial':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+
 break
 
 case 'features':
@@ -357,6 +346,7 @@ case 'features':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
 break
 
 case 'footer':
@@ -373,6 +363,7 @@ case 'footer':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
 break
 
 case 'button':
@@ -389,6 +380,8 @@ case 'button':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+  
 break
 
 case 'buttonset':
@@ -405,6 +398,7 @@ case 'buttonset':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
 break
 
 
@@ -422,6 +416,8 @@ case 'loading':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+
 break
 
 
@@ -439,6 +435,10 @@ case 'cartoons':
       },
     },
   })
+
+  emitComponentDropped(socket, roomId, state);
+
+
 break
 
 case 'texthover':
@@ -455,6 +455,8 @@ case 'texthover':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+
 break
 
 
@@ -472,6 +474,7 @@ case 'greetings':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
 break
 
 
@@ -489,6 +492,8 @@ case 'lasers':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+
 break
 
 
@@ -506,6 +511,7 @@ case 'graph':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
 break
 
 
@@ -523,6 +529,8 @@ case 'navbars':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+
 break
 
 
@@ -540,6 +548,8 @@ case 'gridsandcards':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+
 break
 
 case 'modals':
@@ -556,6 +566,8 @@ case 'modals':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+
 break
 
 
@@ -573,6 +585,7 @@ case 'search':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
 break
 
 
@@ -590,6 +603,8 @@ case 'tc':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+
 break
 
 
@@ -607,6 +622,7 @@ case 'steps':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
 break
 
 
@@ -624,6 +640,8 @@ case 'sm':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+
 break
 
 case 'stack':
@@ -640,6 +658,8 @@ case 'stack':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
+
 break
 
 
@@ -658,6 +678,7 @@ case 'urlimg':
       },
     },
   })
+  emitComponentDropped(socket, roomId, state);
 break
 
 
@@ -693,6 +714,7 @@ break
             },
           },
         })
+        emitComponentDropped(socket, roomId, state);
         break
     }
   }
@@ -723,6 +745,7 @@ break
         elementDetails: element,
       },
     })
+    
   }
 
   return (
@@ -770,8 +793,6 @@ break
           <Recursive
             key={childElement.id}
             element={childElement}
-            onDrop={handleComponentDrop} 
-            onDelete={handleComponentDelete} 
           />
         ))}
 

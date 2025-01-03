@@ -7,9 +7,15 @@ import clsx from 'clsx'
 import { Trash, X } from 'lucide-react'
 import React, { useState, useEffect } from 'react'
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 const LoadingComponent = (props: Props) => {
   const { dispatch, state } = useEditor()
+  
+  const socket = useSocket();
+  const { roomId } = useParams();
+
   const [progress, setProgress] = useState(0)
   const [loadingElements, setLoadingElements] = useState([
     'spinner',
@@ -30,6 +36,15 @@ const LoadingComponent = (props: Props) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     })
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
   }
 
   const handleOnClickBody = (e: React.MouseEvent) => {

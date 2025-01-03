@@ -61,8 +61,6 @@ const EditorContent = ({ liveMode, element }: Props) => {
   const navigate = useNavigate();
   const { roomId } = useParams();
 
-
-
   useEffect(() => {
     if (!socket) {
       console.error('Socket instance not available in EditorContent.');
@@ -127,43 +125,6 @@ useEffect(() => {
   };
 }, [socket, dispatch]);
 
-
-
-
-
-  const handleComponentDrop = (element: EditorElement) => {
-    console.log('Handling component drop:', element);
-    dispatch({
-      type: 'ADD_ELEMENT',
-      payload: { containerId: id, elementDetails: element },
-    });
-
-    //setCanvasComponents((prev) => [...prev, element]);
-
-    // Emit to the server to notify others about the new component
-    if (socket && roomId) {
-      console.log('Emitting componentDropped:', { roomId, element });
-      socket.emit(ACTIONS.COMPONENT_DROPPED, { roomId, element });
-    }
-  };
-
-  const handleComponentDelete = (elementId: string, element: EditorElement) => {
-    console.log('EC componentDeleted');
-
-    dispatch({
-      type: 'DELETE_ELEMENT',
-      payload: { elementDetails: element },
-    });
-
-    //setCanvasComponents((prev) => prev.filter((comp) => comp.id !== elementId));
-
-    // Emit to the server to notify others about the deletion
-    if (socket && roomId) {
-      window.alert("Del from editor content")
-      console.log('Emitting componentDeleted:', { roomId, element, elementId });
-      socket.emit(ACTIONS.COMPONENT_DELETED, { roomId, elementId });
-    }
-  };
 
 
 
@@ -428,8 +389,6 @@ import React from 'react';
               <Component_distributor
                 key={childElement.id}
                 element={childElement}
-                onDrop={handleComponentDrop} 
-                onDelete={handleComponentDelete} 
               
               />
             ))}

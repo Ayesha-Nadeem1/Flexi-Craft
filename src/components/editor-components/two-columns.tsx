@@ -7,10 +7,15 @@ import { EditorBtns, defaultStyles } from '../../pages/const'
 import { Badge } from '../ui/badge'
 import { EditorElement, useEditor } from '../../pages/editor-provider'
 import {Props} from './types'
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
 
 const TwoColumns = (props: Props) => {
   const { id, content, type } = props.element
   const { dispatch, state } = useEditor()
+  const socket = useSocket();
+  const { roomId } = useParams();
 
   const handleOnDrop = (e: React.DragEvent, type: string) => {
     e.stopPropagation()
@@ -117,11 +122,7 @@ const TwoColumns = (props: Props) => {
         content.map((childElement) => (
           <RecursiveElement
             key={childElement.id}
-            element={childElement} onDrop={function (element: EditorElement): void {
-              throw new Error('Function not implemented.')
-            } } onDelete={function (elementId: string, element: EditorElement): void {
-              throw new Error('Function not implemented.')
-            } }            />
+            element={childElement}  />
         ))}
 
     </div>

@@ -1,6 +1,4 @@
 'use client';
-
-
 import { EditorBtns } from '../../pages/const';
 import { Badge } from '../ui/badge'
 import { EditorElement, useEditor } from '../../pages/editor-provider'
@@ -8,10 +6,14 @@ import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import React, { useState } from 'react';
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 
 const MediaComponent = (props: Props) => {
   const { dispatch, state } = useEditor();
+  const socket = useSocket();
+  const { roomId } = useParams();
   const [mediaUrl, setMediaUrl] = useState<string>(props.element.mediaUrl || '');
   const [imageWidth, setImageWidth] = useState<string>(props.element.imageWidth || '100%');
   const [imageHeight, setImageHeight] = useState<string>(props.element.imageHeight || 'auto');
@@ -37,6 +39,16 @@ const MediaComponent = (props: Props) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+      
   };
 
 

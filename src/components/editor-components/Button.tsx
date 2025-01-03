@@ -7,16 +7,30 @@ import { Trash } from 'lucide-react';
 import React from 'react';
 import DOMPurify from 'dompurify';
 import { Props } from './types'; 
-
+import { useSocket } from '../../SocketContext';  
+import { useParams } from 'react-router-dom';
 
 const ButtonSection = (props: Props) => {
   const { dispatch, state } = useEditor();
+  const  socket  = useSocket(); 
+  const { roomId } = useParams();
 
   const handleDeleteElement = () => {
     dispatch({
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: props.element },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+    
+      socket.emit('componentDeleted', {
+        roomId,
+        updatedElements,
+      });
+    }, 0);
+  
+    console.log("Component deleted:", roomId, props.element.id, props.element,state);
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {

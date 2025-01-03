@@ -6,10 +6,15 @@ import { Trash } from 'lucide-react';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
+
 
 
 const TabsAndAccordions: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
+  const socket = useSocket();
+  const { roomId } = useParams();
   const [tabs, setTabs] = useState<string[]>(element.tabs || ['Tab 1', 'Tab 2', 'Tab 3']);
   const [tabContents, setTabContents] = useState<string[]>(element.tabContents || ['Content for Tab 1', 'Content for Tab 2', 'Content for Tab 3']);
   const [activeTab, setActiveTab] = useState<number>(0);
@@ -64,6 +69,18 @@ const TabsAndAccordions: React.FC<Props> = ({ element }) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: element },
     });
+
+    
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
+
+
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {

@@ -6,6 +6,8 @@ import clsx from 'clsx'
 import { Trash } from 'lucide-react'
 import React, { useState } from 'react'
 import { Props } from './types'; 
+import { useSocket } from '../../SocketContext';
+import { useParams } from 'react-router-dom';
 
 
 const GridAndCards: React.FC<Props> = ({ element }) => {
@@ -17,6 +19,10 @@ const GridAndCards: React.FC<Props> = ({ element }) => {
   ])
   const [columns, setColumns] = useState<number>(3)
   const [cardColor, setCardColor] = useState<string>(element.styles.backgroundColor || '#ffffff')
+  const socket = useSocket();
+  const { roomId } = useParams();
+
+
 
   const handleDeleteCard = (index: number) => {
     const updatedCards = cards.filter((_, i) => i !== index)
@@ -27,6 +33,8 @@ const GridAndCards: React.FC<Props> = ({ element }) => {
         elementDetails: { ...element, cards: updatedCards },
       },
     })
+
+    
   }
 
   const handleDeleteContainer = () => {
@@ -34,6 +42,15 @@ const GridAndCards: React.FC<Props> = ({ element }) => {
       type: 'DELETE_ELEMENT',
       payload: { elementDetails: element },
     })
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      
+      socket.emit('componentDeleted', {
+      roomId,
+      updatedElements,
+      });
+      }, 0);
   }
 
   const handleOnClickBody = (e: React.MouseEvent) => {

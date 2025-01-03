@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import { Trash } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 import {Props} from './types'
-import { useSocket } from '../../SocketContext';  // Import the socket context
+import { useSocket } from '../../SocketContext';  
 import { useParams } from 'react-router-dom';
 
 
@@ -16,20 +16,7 @@ const TextComponent = (props: Props) => {
   const { roomId } = useParams();
   const [textContent, setTextContent] = useState<string>(props.element.texttitle || 'Sample Text'); // Contentoptimization
 
-  
-
-  
-  
   const handleDeleteElement = useCallback(() => {
-
-  //const updatedElements = state.editor.elements.filter(
-  //  (el) => el.id !== props.element.id
-  //);
-
-  //const updatedState = {
-  //  ...state.editor,
-  //  elements: updatedElements,
-  //};
 
   dispatch({
     type: 'DELETE_ELEMENT',
@@ -37,7 +24,7 @@ const TextComponent = (props: Props) => {
   });
 
   setTimeout(() => {
-    const updatedElements = JSON.stringify(state.editor.elements); // Replace with Redux `getState` if available
+    const updatedElements = JSON.stringify(state.editor.elements);
   
     socket.emit('componentDeleted', {
       roomId,
