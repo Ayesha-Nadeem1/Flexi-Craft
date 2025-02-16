@@ -3,7 +3,7 @@ import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {Props} from './types'
 import { useSocket } from '../../SocketContext';  
 import { useParams } from 'react-router-dom';
@@ -25,10 +25,11 @@ const TextComponent = (props: Props) => {
 
   setTimeout(() => {
     const updatedElements = JSON.stringify(state.editor.elements);
-  
+
     socket.emit('componentDeleted', {
       roomId,
       updatedElements,
+      deletedElement: props.element,  
     });
   }, 0);
 
@@ -46,7 +47,11 @@ const TextComponent = (props: Props) => {
       },
     });
 
-    //socket.emit('componentDropped', props.element);
+     socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
+
   };
 
   const handleUpdateText = (e: React.FocusEvent<HTMLSpanElement>) => {
@@ -58,18 +63,54 @@ const TextComponent = (props: Props) => {
       payload: {
         elementDetails: {
           ...props.element,
-          texttitle: updatedText, 
+          texttitle: updatedText,
         },
       },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('textUpdated',{roomId,elementId:props.element.id,updatedText,updatedElements});
+    }, 0);
+
+    //socket.emit('textUpdated', { roomId, elementId: props.element.id, updatedcontent : updatedText });
+
   };
+
+  // Listen for real-time text updates
+  useEffect(() => {
+    const handleTextUpdate = ({ elementId, updatedText }: { elementId: string; updatedText: string }) => {
+      if (elementId === props.element.id) {
+        console.log("Received update:", updatedText);
+        console.log("Received id:", elementId);
+
+        setTextContent(updatedText); 
+
+        /*dispatch({
+          type: 'UPDATE_ELEMENT',
+          payload: {
+            elementDetails: {
+              ...props.element,
+              texttitle: updatedText,
+            },
+          },
+        });*/
+      }
+    };
+  
+    socket.on('textUpdated', handleTextUpdate);
+  
+    return () => {
+      socket.off('textUpdated', handleTextUpdate);
+    };
+  }, [socket, props.element.id, dispatch]);
+  
 
   const styles = props.element.styles;
 
   const handleOnDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    socket.emit('componentDropped', props.element);
-  };
+    };
 
   return (
     <div
@@ -95,7 +136,8 @@ const TextComponent = (props: Props) => {
       <span
         contentEditable={!state.editor.liveMode}
         suppressContentEditableWarning={true}
-        onBlur={handleUpdateText}
+        //onBlur={handleUpdateText}
+        onInput={handleUpdateText}
         onDrop={handleOnDrop}  
       >
         {textContent}

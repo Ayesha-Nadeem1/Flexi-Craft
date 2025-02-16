@@ -15,6 +15,7 @@ import { useSocket } from '../../SocketContext';  // Import the socket context
 
 
 
+
 type Props = { element: EditorElement }
 
 const Container = ({ element }: Props) => {
@@ -28,13 +29,10 @@ const Container = ({ element }: Props) => {
 
 
 
-  
-
-
 useEffect(() => {
   const handleSyncState = ({ roomId, updatedElements }: { roomId: string; updatedElements: any }) => {
-    console.log(`Sync event received for Room ID: ${roomId}`, updatedElements);
-    console.log("Updated elements: ", updatedElements)
+    console.log(`C Sync event received for Room ID: ${roomId}`, updatedElements);
+    console.log("C Updated elements: ", updatedElements)
 
     let parsedElements;
     try {
@@ -46,7 +44,7 @@ useEffect(() => {
 
     console.log('Recent elements:', parsedElements);
     dispatch({
-      type: 'LOAD_DATA_S',
+    type: 'LOAD_DATA_S',
       payload: { elements: parsedElements },
     });
   };
@@ -60,24 +58,105 @@ useEffect(() => {
 }, [socket, dispatch]);
 
 
-  useEffect(() => {
-    if (socketRef.current) {
-      socketRef.current.on('componentDropped', (componentData: any) => {
-        setCanvasComponents((prev) => [...prev, componentData]);
-      });
 
-      socketRef.current.on('componentDeleted', (componentId: string) => {
-        setCanvasComponents((prev) => prev.filter((comp) => comp.id !== componentId));
-      });
+useEffect(() => {
+  const handleElementdel = ({ deletedElement }: { deletedElement: any }) => {
+    console.log('Element del:', deletedElement);
+
+    dispatch({
+      type: 'DELETE_ELEMENT',
+      payload: {
+        elementDetails: deletedElement,
+      },
+    })
+  };
+
+  socket.on('componentDeleted', handleElementdel);
+
+  return () => {
+    socket.off('componentDeleted', handleElementdel);
+  };
+}, [socket, dispatch]);
+
+
+
+useEffect(() => {
+  const handleElementadd = ({ addedElement, containerId }: { addedElement: any, containerId : any }) => {
+    console.log('Element add:', addedElement);
+    console.log('cont add:', containerId);
+
+    dispatch({
+      type: "ADD_ELEMENT",
+      payload: {
+        containerId,
+        elementDetails: addedElement,
+      },
+    });
+
+  };
+
+  socket.on('componentDropped', handleElementadd);
+
+  return () => {
+    socket.off('componentDropped', handleElementadd);
+  };
+}, [socket, dispatch]);
+
+
+
+
+
+
+useEffect(() => {
+  const handleElementClick = ({ selectedElement }: { selectedElement: EditorElement }) => {
+    console.log('Element clicked:', selectedElement);
+
+    // Dispatch action to update UI state with the selected element
+    dispatch({
+      type: 'CHANGE_CLICKED_ELEMENT',
+      payload: {
+        elementDetails: selectedElement,
+      },
+    });
+  };
+
+  socket.on('elementClicked', handleElementClick);
+
+  return () => {
+    socket.off('elementClicked', handleElementClick);
+  };
+}, [socket, dispatch]);
+
+
+
+
+
+  useEffect(() => {
+
+    //socketRef.current = socket; // Ensure socketRef is initialized
+
+    if (socketRef.current) {
+      //socketRef.current.on('componentDropped', (componentData: any) => {
+      //  setCanvasComponents((prev) => [...prev, componentData]);
+      //});
+
+      //socketRef.current.on('componentDeleted', (componentId: string) => {
+      //  setCanvasComponents((prev) => prev.filter((comp) => comp.id !== componentId));
+      //});
+
+
+
     }
 
     return () => {
       if (socketRef.current) {
-        socketRef.current.off('componentDropped');
-        socketRef.current.off('componentDeleted');
+        //socketRef.current.off('componentDropped');
+        //socketRef.current.off('componentDeleted');
+
       }
     };
 }, [socketRef]);
+
 
 
   const emitComponentDropped = (socket :any, roomId : any, state: any) => {
@@ -92,633 +171,171 @@ useEffect(() => {
   };
 
   
+const dispatchElement = (
+  containerId: string,
+  name: string,
+  type: EditorBtns,
+  content: any = [],
+  styles: object = {}
+) => {
 
+  const newElement = {
+    id: uuidv4(),
+    name,
+    type,
+    content,
+    styles,
+  };
 
-  const handleOnDrop = (e: React.DragEvent, type: string) => {
-    e.stopPropagation() //to prevent event bubbling
-    const componentType = e.dataTransfer.getData('componentType') as EditorBtns
+  dispatch({
+    type: "ADD_ELEMENT",
+    payload: {
+      containerId,
+      elementDetails: newElement,
+    },
+  });
 
-    switch (componentType) {
-      case 'text':
-        dispatch({
-          type: 'ADD_ELEMENT',
-          payload: {
-            containerId: id,
-            elementDetails: {
-              content: { innerText: 'Text Element' },
-              id: uuidv4(),
-              name: 'Text',
-              styles: {
-                color: 'black',
-                ...defaultStyles,
-              },
-              type: 'text',
-            },
-          },
-        })
-        emitComponentDropped(socket, roomId, state);
-        break
-      case 'link':
-        dispatch({
-          type: 'ADD_ELEMENT',
-          payload: {
-            containerId: id,
-            elementDetails: {
-              content: {
-                innerText: 'Link Element',
-                href: '#',
-              },
-              id: uuidv4(),
-              name: 'Link',
-              styles: {
-                color: 'black',
-                ...defaultStyles,
-              },
-              type: 'link',
-            },
-          },
-        })
-        break
-      case 'video':
-        dispatch({
-          type: 'ADD_ELEMENT',
-          payload: {
-            containerId: id,
-            elementDetails: {
-              content: {
-                src: 'https://www.youtube.com/watch?v=mTbD8tYsVvk&t=3081s',
-              },
-              id: uuidv4(),
-              name: 'Video',
-              styles: {},
-              type: 'video',
-            },
-          },
-        })
-        emitComponentDropped(socket, roomId, state);
-        break
-      case 'container':
-        dispatch({
-          type: 'ADD_ELEMENT',
-          payload: {
-            containerId: id,
-            elementDetails: {
-              content: [],
-              id: uuidv4(),
-              name: 'Container',
-              styles: { ...defaultStyles },
-              type: 'container',
-            },
-          },
-        })
-        break
-      case 'contactForm':
-        dispatch({
-          type: 'ADD_ELEMENT',
-          payload: {
-            containerId: id,
-            elementDetails: {
-              content: [],
-              id: uuidv4(),
-              name: 'Contact Form',
-              styles: {},
-              type: 'contactForm',
-            },
-          },
-        })
-        emitComponentDropped(socket, roomId, state);
-        break
-      case 'paymentForm':
-        dispatch({
-          type: 'ADD_ELEMENT',
-          payload: {
-            containerId: id,
-            elementDetails: {
-              content: [],
-              id: uuidv4(),
-              name: 'Contact Form',
-              styles: {},
-              type: 'paymentForm',
-            },
-          },
-        })
-        emitComponentDropped(socket, roomId, state);
-        break
+  setTimeout(() => {
+  const updatedElements = JSON.stringify(state.editor.elements); 
 
-      case 'inputfield':
-          dispatch({
-            type: 'ADD_ELEMENT',
-            payload: {
-              containerId: id,
-              elementDetails: {
-                content: [],
-                id: uuidv4(),
-                name: 'Input Field',
-                styles: {},
-                type: 'inputfield',
-              },
-            },
-          })
-          emitComponentDropped(socket, roomId, state);
+    socket.emit('componentDropped', {
+      roomId,
+      updatedElements,
+      addedElement : newElement,
+      containerId
+    });
+  }, 0);
 
-      break
+};
 
-      case 'header':
-        dispatch({
-          type: 'ADD_ELEMENT',
-          payload: {
-            containerId: id,
-            elementDetails: {
-              content: [],
-              id: uuidv4(),
-              name: 'Header',
-              styles: {},
-              type: 'header',
-            },
-          },
-        })
-        emitComponentDropped(socket, roomId, state);
+// Main function to handle the drop event
+const handleOnDrop = (e: React.DragEvent, type: string) => {
+  e.stopPropagation(); // Prevent event bubbling
+  const componentType = e.dataTransfer.getData("componentType") as EditorBtns;
 
-    break
+  const defaultStyleOverrides = { color: "black", ...defaultStyles };
 
-    case 'signup':
-      dispatch({
-        type: 'ADD_ELEMENT',
-        payload: {
-          containerId: id,
-          elementDetails: {
-            content: [],
-            id: uuidv4(),
-            name: 'Sign up',
-            styles: {},
-            type: 'signup',
-          },
-        },
-      })
-      emitComponentDropped(socket, roomId, state);
-
-  break
-
-
-
-  case 'signin':
-    dispatch({
-      type: 'ADD_ELEMENT',
-      payload: {
-        containerId: id,
-        elementDetails: {
+  switch (componentType) {
+    case "text":
+      dispatchElement(id, "Text", "text", { innerText: "Text Element" }, defaultStyleOverrides);
+      break;
+    case "link":
+      dispatchElement(id, "Link", "link", { innerText: "Link Element", href: "#" }, defaultStyleOverrides);
+      break;
+    case "video":
+      dispatchElement(id, "Video", "video", { src: "https://www.youtube.com/watch?v=mTbD8tYsVvk&t=3081s" }, {});
+      break;
+    case "container":
+      dispatchElement(id, "Container", "container", [], defaultStyleOverrides);
+      break;
+    case "contactForm":
+      dispatchElement(id, "Contact Form", "contactForm", [], {});
+      break;
+    case "paymentForm":
+      dispatchElement(id, "Payment Form", "paymentForm", [], {});
+      break;
+    case "inputfield":
+      dispatchElement(id, "Input Field", "inputfield", [], {});
+      break;
+    case "header":
+      dispatchElement(id, "Header", "header", [], {});
+      break;
+    case "signup":
+      dispatchElement(id, "Sign Up", "signup", [], {});
+      break;
+    case "signin":
+      dispatchElement(id, "Sign In", "signin", [], {});
+      break;
+    case "hero":
+      dispatchElement(id, "Hero", "hero", [], {});
+      break;
+    case "value":
+      dispatchElement(id, "Value", "value", [], {});
+      break;
+    case "testimonial":
+      dispatchElement(id, "Testimonial", "testimonial", [], {});
+      break;
+    case "features":
+      dispatchElement(id, "Features", "features", [], {});
+      break;
+    case "footer":
+      dispatchElement(id, "Footer", "footer", [], {});
+      break;
+    case "button":
+      dispatchElement(id, "Button", "button", [], {});
+      break;
+    case "buttonset":
+      dispatchElement(id, "Buttonset", "buttonset", [], {});
+      break;
+    case "loading":
+      dispatchElement(id, "Loading", "loading", [], {});
+      break;
+    case "cartoons":
+      dispatchElement(id, "Cartoons", "cartoons", [], {});
+      break;
+    case "texthover":
+      dispatchElement(id, "Text Hover", "texthover", [], {});
+      break;
+    case "greetings":
+      dispatchElement(id, "Greetings", "greetings", [], {});
+      break;
+    case "lasers":
+      dispatchElement(id, "Lasers", "lasers", [], {});
+      break;
+    case "graph":
+      dispatchElement(id, "Graph", "graph", [], {});
+      break;
+    case "navbars":
+      dispatchElement(id, "Navbars", "navbars", [], {});
+      break;
+    case "gridsandcards":
+      dispatchElement(id, "Grids and Cards", "gridsandcards", [], {});
+      break;
+    case "modals":
+      dispatchElement(id, "Modals", "modals", [], {});
+      break;
+    case "search":
+      dispatchElement(id, "Search", "search", [], {});
+      break;
+    case "tc":
+      dispatchElement(id, "Tabs and Accordions", "tc", [], {});
+      break;
+    case "steps":
+      dispatchElement(id, "Steps", "steps", [], {});
+      break;
+    case "sm":
+      dispatchElement(id, "Social Media", "sm", [], {});
+      break;
+    case "stack":
+      dispatchElement(id, "Stack", "stack", [], { display: "flex", flexDirection: "column", ...defaultStyles });
+      break;
+    case "urlimg":
+      dispatchElement(id, "Image", "urlimg", [], {});
+      break;
+    case "2Col":
+      dispatchElement(id, "Two Columns", "2Col", [
+        {
           content: [],
           id: uuidv4(),
-          name: 'Sign In',
-          styles: {},
-          type: 'signin',
+          name: "Container",
+          styles: { ...defaultStyles, width: "100%" },
+          type: "container",
         },
-      },
-    })
-    emitComponentDropped(socket, roomId, state);
-break
-
-
-    case 'hero':
-      dispatch({
-        type: 'ADD_ELEMENT',
-        payload: {
-          containerId: id,
-          elementDetails: {
-            content: [],
-            id: uuidv4(),
-            name: 'Hero',
-            styles: {},
-            type: 'hero',
-          },
-        },
-      })
-      emitComponentDropped(socket, roomId, state);
-  break
-
-  case 'value':
-    dispatch({
-      type: 'ADD_ELEMENT',
-      payload: {
-        containerId: id,
-        elementDetails: {
+        {
           content: [],
           id: uuidv4(),
-          name: 'Value',
-          styles: {},
-          type: 'value',
+          name: "Container",
+          styles: { ...defaultStyles, width: "100%" },
+          type: "container",
         },
-      },
-    })
-    emitComponentDropped(socket, roomId, state);
-break
-
-
-case 'testimonial':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Testimonial',
-        styles: {},
-        type: 'testimonial',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-
-break
-
-case 'features':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Features',
-        styles: {},
-        type: 'features',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-break
-
-case 'footer':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Footer',
-        styles: {},
-        type: 'footer',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-break
-
-case 'button':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Button',
-        styles: {},
-        type: 'button',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-  
-break
-
-case 'buttonset':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Buttonset',
-        styles: {},
-        type: 'buttonset',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-break
-
-
-case 'loading':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Loading',
-        styles: {},
-        type: 'loading',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-
-break
-
-
-case 'cartoons':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Cartoons',
-        styles: {},
-        type: 'cartoons',
-      },
-    },
-  })
-
-  emitComponentDropped(socket, roomId, state);
-
-
-break
-
-case 'texthover':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Text hover',
-        styles: {},
-        type: 'texthover',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-
-break
-
-
-case 'greetings':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Greetings',
-        styles: {},
-        type: 'greetings',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-break
-
-
-case 'lasers':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Lasers',
-        styles: {},
-        type: 'lasers',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-
-break
-
-
-case 'graph':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Graph',
-        styles: {},
-        type: 'graph',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-break
-
-
-case 'navbars':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Navbars',
-        styles: {},
-        type: 'navbars',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-
-break
-
-
-case 'gridsandcards':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Grids and Cards',
-        styles: {},
-        type: 'gridsandcards',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-
-break
-
-case 'modals':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Modals',
-        styles: {},
-        type: 'modals',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-
-break
-
-
-case 'search':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Search',
-        styles: {},
-        type: 'search',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-break
-
-
-case 'tc':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Tabs and Accordions',
-        styles: {},
-        type: 'tc',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-
-break
-
-
-case 'steps':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Steps',
-        styles: {},
-        type: 'steps',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-break
-
-
-case 'sm':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Social Media',
-        styles: {},
-        type: 'sm',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-
-break
-
-case 'stack':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Stack',
-        styles: {display: 'flex', flexDirection: 'column', ...defaultStyles},
-        type: 'stack',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-
-break
-
-
-
-case 'urlimg':
-  dispatch({
-    type: 'ADD_ELEMENT',
-    payload: {
-      containerId: id,
-      elementDetails: {
-        content: [],
-        id: uuidv4(),
-        name: 'Image',
-        styles: {},
-        type: 'urlimg',
-      },
-    },
-  })
-  emitComponentDropped(socket, roomId, state);
-break
-
-
-
-
-
-      case '2Col':
-        dispatch({
-          type: 'ADD_ELEMENT',
-          payload: {
-            containerId: id,
-            elementDetails: {
-              content: [
-                {
-                  content: [],
-                  id: uuidv4(),
-                  name: 'Container',
-                  styles: { ...defaultStyles, width: '100%' },
-                  type: 'container',
-                },
-                {
-                  content: [],
-                  id: uuidv4(),
-                  name: 'Container',
-                  styles: { ...defaultStyles, width: '100%' },
-                  type: 'container',
-                },
-              ],
-              id: uuidv4(),
-              name: 'Two Columns',
-              styles: { ...defaultStyles, display: 'flex' },
-              type: '2Col',
-            },
-          },
-        })
-        emitComponentDropped(socket, roomId, state);
-        break
-    }
+      ], { ...defaultStyles, display: "flex" });
+      break;
+    default:
+      break;
   }
+};
 
+  
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
   }

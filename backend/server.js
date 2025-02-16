@@ -4,6 +4,8 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 
+
+
 const ACTIONS = {
   JOIN: "join",
   JOINED: "joined",
@@ -20,6 +22,7 @@ app.use(express.json());
 
 // API routes
 const templateRoutes = require('./templates');
+const { TIMEOUT } = require('dns');
 app.use('/api/templates', templateRoutes);
 
 const server = http.createServer(app);
@@ -47,18 +50,23 @@ io.on('connection', (socket) => {
   console.log('New connection:', socket.id);
 
   // Handle JOIN event
-  socket.on(ACTIONS.JOIN, ({ roomId, username }) => {
+  socket.on(ACTIONS.JOIN, ({ roomId, username, updatedElements }) => {
     socket.join(roomId); // Join the room
     socket.username = username; // Store the username on the socket object
-    console.log(`${username} joined room: ${roomId}`);
 
-    //sync canvas for new user too bozo
-
-    // Initialize the room if it doesn't exist
+    // If the room doesn't exist, initialize it
     if (!rooms[roomId]) {
-      rooms[roomId] = [];
+      rooms[roomId] = updatedElements ? JSON.parse(updatedElements) : [];
+      //rooms[roomId] = []
     }
+  
+    // Send the latest state to the new user
+    socket.to(roomId).emit('syncState', {
+      roomId,
+      updatedElements: JSON.stringify(rooms[roomId]) // Send latest stored state
+    });
 
+  
     // Broadcast to all clients in the room
     const clients = getAllConnectedClients(roomId);
     io.to(roomId).emit(ACTIONS.JOINED, {
@@ -66,17 +74,26 @@ io.on('connection', (socket) => {
       username,
       socketId: socket.id,
     });
+
   });
 
-  socket.on('componentDropped', ({ roomId, updatedElements }) => {
+  socket.on('elementClicked', ({ roomId, selectedElement }) => {
+    socket.to(roomId).emit('syncState', { roomId, selectedElement });
+    socket.to(roomId).emit('elementClicked', { roomId, selectedElement });
+  });
+
+  socket.on('textUpdated', ({ roomId, elementId, updatedText, updatedElements }) => {
+    socket.to(roomId).emit('syncState', { roomId, updatedElements });
+    socket.to(roomId).emit('textUpdated', { elementId, updatedText });
+  });
+
+  socket.on('componentDropped', ({ roomId, updatedElements, addedElement, containerId }) => {
     console.log(`Dropped event received for Room ID: ${roomId}`);
 
-    // Validate if the room exists
     if (rooms[roomId]) {
       try {
-        JSON.parse(updatedElements); // Validate JSON
         socket.to(roomId).emit('syncState', { roomId, updatedElements });
-        socket.to(roomId).emit('componentDropped', { roomId, updatedElements });
+        socket.to(roomId).emit('componentDropped', { roomId, addedElement, containerId });
         console.log(`State synced with Room ID: ${roomId}`);
       } catch (err) {
         console.error(`Invalid JSON received for Room ID: ${roomId}`, err);
@@ -86,15 +103,13 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('componentDeleted', ({ roomId, updatedElements }) => {
+  socket.on('componentDeleted', ({ roomId, updatedElements, deletedElement }) => {
     console.log(`Delete event received for Room ID: ${roomId}`);
 
-    // Validate if the room exists
     if (rooms[roomId]) {
       try {
-        JSON.parse(updatedElements); // Validate JSON
         socket.to(roomId).emit('syncState', { roomId, updatedElements });
-        socket.to(roomId).emit('componentDeleted', { roomId, updatedElements });
+        socket.to(roomId).emit('componentDeleted', { roomId, updatedElements, deletedElement });
         console.log(`State synced with Room ID: ${roomId}`);
       } catch (err) {
         console.error(`Invalid JSON received for Room ID: ${roomId}`, err);

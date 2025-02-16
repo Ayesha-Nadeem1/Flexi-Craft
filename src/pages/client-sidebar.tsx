@@ -18,6 +18,8 @@ const ClientSidebar: React.FC<ClientSidebarProps> = ({
     copyRoomId,
     leaveRoom,
 }) => {
+    console.log('Current Clients:', clients); // Debugging the clients array
+
     return (
         <div className="flex flex-col h-full min-h-screen bg-gray-300 border text-white p-4">
         {/* Logo and Title */}

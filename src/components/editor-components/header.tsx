@@ -36,7 +36,6 @@ const HeaderComponent = (props: Props) => {
       });
       }, 0);
 
-
     };
 
   const handleOnClickBody = (e: React.MouseEvent) => {

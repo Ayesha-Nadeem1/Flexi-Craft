@@ -13,7 +13,7 @@ const Page: React.FC<{ element: EditorElement }> = ({ element }) => {
 
   useEffect(() => {
     // Set a timeout to show the content after 5 seconds
-    const timer = setTimeout(() => setShowContent(true), 5000);
+    const timer = setTimeout(() => setShowContent(true), 3000);
     return () => clearTimeout(timer); // Cleanup on unmount
   }, []);
 
@@ -21,7 +21,7 @@ const Page: React.FC<{ element: EditorElement }> = ({ element }) => {
     <div>
       {showContent ? (
         <Suspense fallback={<Loading />}>
-          <EditorPage element={element}/>
+          <EditorPage element={element} />
         </Suspense>
       ) : (
         <Loading />

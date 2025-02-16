@@ -4,10 +4,11 @@ import toast from 'react-hot-toast';
 import { useSocket } from '../SocketContext'; 
 import ClientSidebar from './client-sidebar';
 import EditorProvider from './editor-provider';
-import { EditorElement } from './editor-provider';
+import { EditorElement,useEditor } from './editor-provider';
 import EditorNavigation from './editor-navigation';
 import EditorContent from './editor-content';
 import EditorSidebar from './editor-sidebar';
+
 
 interface Client {
     socketId: string;
@@ -27,11 +28,13 @@ interface DisconnectedEventPayload {
 
 }
 
-const EditorPage: React.FC<{ element: EditorElement }> = ({ element }) => {
+const EditorPage: React.FC<{ element: EditorElement}> = ({ element }) => {
     const ACTIONS = {
         JOIN: 'join',
         JOINED: 'joined',
         DISCONNECTED: 'disconnected',
+        //SYNC_STATE_REQUEST: 'syncStateRequest',
+        //SYNC_STATE_RESPONSE: 'syncStateResponse',
     };
 
     const navigate = useNavigate();
@@ -40,8 +43,16 @@ const EditorPage: React.FC<{ element: EditorElement }> = ({ element }) => {
     const { roomId } = useParams(); // roomId can be undefined
     const [clients, setClients] = useState<Client[]>([]);
     const socket = useSocket(); // Use socket from context
+    const { state, dispatch } = useEditor()
+    const [livemode, setLiveMode] = useState(false); // Track liveMode in EditorPage
+
+    const handleLiveModeChange = (newLiveMode: boolean) => {
+        setLiveMode(newLiveMode); // Update liveMode state when it changes in EditorContent
+    };
 
     useEffect(() => {
+        const init = async () => {
+
         if (!socket) {
             console.error('Socket instance not available');
             return;
@@ -56,16 +67,25 @@ const EditorPage: React.FC<{ element: EditorElement }> = ({ element }) => {
             navigate('/');
         }
 
+        setTimeout(() => {
+            const updatedElements = JSON.stringify(state.editor.elements);
+            console.log("EP", updatedElements)
+            
         // Emit JOIN event
         if (roomId) {
             socket.emit(ACTIONS.JOIN, {
                 roomId,
                 username: location.state?.username,
+                updatedElements
             });
+
         } else {
             toast.error('Room ID is missing.');
             navigate('/');
         }
+
+    }, 0);
+
 
         // Handle JOINED event
         socket.on(
@@ -73,23 +93,13 @@ const EditorPage: React.FC<{ element: EditorElement }> = ({ element }) => {
             ({ clients, username }: JoinedEventPayload) => {
                 if (username !== location.state?.username) {
                     toast.success(`${username} joined the room.`);
+
                 }
                 setClients(clients);
             }                                
 
         );
 
-        /*socket.on(
-            ACTIONS.DISCONNECTED,
-            ({ socketId, username }: {socketId:any, username:any}) => {
-                toast.success(`${username} left the room.`);
-                setClients((prev) => {
-                    return prev.filter(
-                        (client) => client.socketId !== socketId
-                    );
-                });
-            }
-        );*/
 
         socket.on(ACTIONS.DISCONNECTED, ({ socketId, username, clients }: {socketId: string, username: string, clients: Client[]}) => {
             toast.success(`${username} left the room.`);
@@ -98,12 +108,16 @@ const EditorPage: React.FC<{ element: EditorElement }> = ({ element }) => {
             setClients(clients); // Use the clients list received from the server
         });
 
+    };
+    init();
         return () => {
-            //socket.disconnect();
-            socket.off(ACTIONS.JOINED);
+            socket.disconnect();
             socket.off(ACTIONS.DISCONNECTED);
+            socket.off(ACTIONS.JOINED);
+            //socket.off(ACTIONS.SYNC_STATE_REQUEST);
+            //socket.off(ACTIONS.SYNC_STATE_RESPONSE);
         };
-    }, [roomId, socket]);
+    }, [roomId, socket, state.editor.elements]);
 
     const copyRoomId = () => {
         navigator.clipboard.writeText(roomId || '').then(() => {
@@ -125,7 +139,7 @@ const EditorPage: React.FC<{ element: EditorElement }> = ({ element }) => {
         socket.disconnect();
     
         // Remove the current user from the client list
-        setClients((prev) => prev.filter((client) => client.socketId !== socket.id));
+        //setClients(clients);
     
         // Show toast message
         toast.success('You left the room.');
@@ -140,16 +154,21 @@ const EditorPage: React.FC<{ element: EditorElement }> = ({ element }) => {
             <EditorProvider>
                 <EditorNavigation />
                 <div className="h-full flex justify-center">
-                    <ClientSidebar
-                        clients={clients}
-                        copyRoomId={copyRoomId}
-                        leaveRoom={leaveRoom}
-                    />
+                {!livemode && (
+                        <ClientSidebar
+                            clients={clients}
+                            copyRoomId={copyRoomId}
+                            leaveRoom={leaveRoom}
+
+                        />
+                    )}
                     {roomId && (
                         <EditorContent
                             liveMode={false}
                             roomId={roomId}
                             element={element}
+                            onLiveModeChange={handleLiveModeChange}
+
                         />
                     )}
                 </div>

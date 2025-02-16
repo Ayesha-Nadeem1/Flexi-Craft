@@ -23,12 +23,23 @@ const Home: React.FC = () => {
             return;
         }
 
+        if (!username || username.length < 3) {
+            toast.error('USERNAME must be at least 3 characters long');
+            return;
+        }
+
         // Redirect to Editor page
         navigate(`/editor/${roomId}`, {
             state: {
                 username,
             },
         });
+    };
+
+    const handleRoomIdPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+        const pastedText = e.clipboardData.getData('text');
+        setRoomId(pastedText.trim());
+        toast.success('Room ID pasted successfully');
     };
 
     const handleInputEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -51,6 +62,8 @@ const Home: React.FC = () => {
                         onChange={(e) => setRoomId(e.target.value)}
                         value={roomId}
                         onKeyUp={handleInputEnter}
+                        readOnly
+                        onPaste={handleRoomIdPaste}
                     />
                     <input
                         type="text"

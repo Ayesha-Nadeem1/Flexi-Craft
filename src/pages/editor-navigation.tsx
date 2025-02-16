@@ -17,13 +17,16 @@ import {
   Tablet,
   Undo2,
 } from 'lucide-react'
-import React, { FocusEventHandler, useEffect } from 'react'
+import React, { FocusEventHandler, useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
 
-// Removed Props type and related props from the component
-const EditorNavigation = () => {
+interface Props {
+}
+
+const EditorNavigation: React.FC<Props> = ({  }) => {
 
   const { state, dispatch } = useEditor()
+
 
   const handlePreviewClick = () => {
     dispatch({ type: 'TOGGLE_PREVIEW_MODE' })
