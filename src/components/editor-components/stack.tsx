@@ -579,6 +579,11 @@ break
         elementDetails: element,
       },
     })
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
+    });
   }
 
   const handleDeleteElement = () => {
@@ -588,16 +593,15 @@ break
         elementDetails: element,
       },
     })
-
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: element,  
       });
-      }, 0);
-
+    }, 0);
       
   }
 

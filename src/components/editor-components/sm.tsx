@@ -9,8 +9,6 @@ import { Props } from './types';
 import { useSocket } from '../../SocketContext';
 import { useParams } from 'react-router-dom';
 
-
-
 type SocialMediaPlatform = 'twitter' | 'facebook' | 'instagram' | 'linkedin';
 
 type SocialMediaButtonProps = {
@@ -83,12 +81,13 @@ const SocialMediaIntegration: React.FC<Props> = ({ element }) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: element,  
       });
-      }, 0);
+    }, 0);
       
   };
 
@@ -97,6 +96,11 @@ const SocialMediaIntegration: React.FC<Props> = ({ element }) => {
     dispatch({
       type: 'CHANGE_CLICKED_ELEMENT',
       payload: { elementDetails: element },
+    });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
     });
   };
 

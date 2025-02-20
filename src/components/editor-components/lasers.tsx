@@ -38,12 +38,17 @@ const { roomId } = useParams();
     socket.emit('componentDeleted', {
     roomId,
     updatedElements,
+    deletedElement: element,  
     });
     }, 0);  };
 
   const handleOnClickBody = (e: React.MouseEvent) => {
     e.stopPropagation();
     // Handle selection change locally if needed
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
+    });
   };
 
   const handleBackgroundColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {

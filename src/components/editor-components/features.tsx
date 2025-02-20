@@ -1,10 +1,9 @@
 'use client';
-
 import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash, Star, Settings, PentagonIcon, Grid } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DOMPurify from 'dompurify'; // Make sure to install dompurify if you haven't
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';
@@ -24,12 +23,13 @@ const FeaturesSection = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
       
   };
 
@@ -41,11 +41,16 @@ const FeaturesSection = (props: Props) => {
         elementDetails: props.element,
       },
     });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
   };
 
   const handleUpdateContent = (
     field: 'feature_title' | 'feature_description' | 'feature1' | 'feature1Description' | 'feature2' | 'feature2Description' | 'feature3' | 'feature3Description' | 'feature4' | 'feature4Description',
-    e: React.FocusEvent<HTMLDivElement>
+    e: React.FormEvent<HTMLDivElement>
   ) => {
     const divElement = e.target as HTMLDivElement;
     const sanitizedContent = DOMPurify.sanitize(divElement.innerHTML);
@@ -59,7 +64,33 @@ const FeaturesSection = (props: Props) => {
         },
       },
     });
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('HeaderUpdated',{roomId,elementId:props.element.id,updatedText : sanitizedContent,field,updatedElements});
+    }, 0);
   };
+
+  useEffect(() => {
+        const handleTextUpdate = ({ elementId, field ,updatedText }: { elementId: string; field:any, updatedText: string }) => {
+          if (elementId === props.element.id) {
+
+            dispatch({
+              type: 'UPDATE_ELEMENT',
+              payload: {
+                elementDetails: {
+                  ...props.element,
+                  [field]: updatedText,
+                },
+              },
+            });
+
+          }
+        };
+        socket.on('HeaderUpdated', handleTextUpdate);
+        return () => {
+          socket.off('HeaderUpdated', handleTextUpdate);
+        };
+      }, [socket, props.element.id, dispatch]);
 
   const styles = props.element.styles;
 
@@ -84,17 +115,27 @@ const FeaturesSection = (props: Props) => {
 
       <h2
         contentEditable={!state.editor.liveMode}
-        onBlur={(e) => handleUpdateContent('feature_title', e)}
+        suppressContentEditableWarning={true}
+        onInput={(e) => handleUpdateContent('feature_title', e)}
         className="text-3xl font-bold mb-6 text-center"
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(props.element.feature_title || 'Our Amazing Features') }}
+      >
+      <span
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(props.element.feature_title || 'Our Amazing Features') }}
+      dir='ltr'
       />
+      </h2>
       
       <p
         contentEditable={!state.editor.liveMode}
-        onBlur={(e) => handleUpdateContent('feature_description', e)}
+        suppressContentEditableWarning={true}
+        onInput={(e) => handleUpdateContent('feature_description', e)}
         className="text-lg mb-8 text-center"
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(props.element.feature_description || 'Discover the innovative features we offer.') }}
+      >
+      <span
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(props.element.feature_description || 'Discover the innovative features we offer.') }}
+      dir='ltr'
       />
+      </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
         {['feature1', 'feature2', 'feature3', 'feature4'].map((featureKey, index) => (
@@ -105,16 +146,26 @@ const FeaturesSection = (props: Props) => {
             {index === 3 && <Grid size={40} className="mb-4 text-blue-400" />}
             <h3
               contentEditable={!state.editor.liveMode}
-              onBlur={(e) => handleUpdateContent(featureKey as 'feature1' | 'feature2' | 'feature3' | 'feature4', e)}
+              suppressContentEditableWarning={true}
+              onInput={(e) => handleUpdateContent(featureKey as 'feature1' | 'feature2' | 'feature3' | 'feature4', e)}
               className="text-xl font-semibold mb-2"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(props.element[featureKey] || `Feature ${index + 1}`) }}
+            >
+            <span
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(props.element[featureKey] || `Feature ${index + 1}`) }}
+            dir="ltr"
             />
+            </h3> 
             <p
               contentEditable={!state.editor.liveMode}
-              onBlur={(e) => handleUpdateContent(`${featureKey}Description` as `${'feature1' | 'feature2' | 'feature3' | 'feature4'}Description`, e)}
+              suppressContentEditableWarning={true}
+              onInput={(e) => handleUpdateContent(`${featureKey}Description` as `${'feature1' | 'feature2' | 'feature3' | 'feature4'}Description`, e)}
               className="text-gray-600"
+            >
+              <span
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(props.element[`${featureKey}Description`] || 'Description of the feature.') }}
-            />
+              dir='ltr'
+              />
+            </p>
           </div>
         ))}
       </div>

@@ -29,6 +29,13 @@ const ContactFormComponent = (props: Props) => {
         elementDetails: props.element,
       },
     })
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
+
+
   }
 
   const styles = props.element.styles
@@ -41,12 +48,14 @@ const ContactFormComponent = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
+    
   }
 
   const onFormSubmit = (e: React.FormEvent) => {

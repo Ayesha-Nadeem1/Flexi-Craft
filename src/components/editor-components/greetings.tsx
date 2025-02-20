@@ -24,6 +24,11 @@ const TextAnimation: React.FC<Props> = ({ element }) => {
         elementDetails: element,
       },
     });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
+    });
   };
 
   const handleDeleteContainer = () => {
@@ -32,14 +37,15 @@ const TextAnimation: React.FC<Props> = ({ element }) => {
       payload: { elementDetails: element },
     });
 
-  setTimeout(() => {
+    setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: element,  
       });
-      }, 0);
+    }, 0);
       
 
 

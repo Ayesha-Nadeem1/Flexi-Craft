@@ -1,5 +1,4 @@
 'use client';
-
 import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import { Trash } from 'lucide-react';
@@ -8,8 +7,6 @@ import React, { useEffect, useState } from 'react';
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';
 import { useParams } from 'react-router-dom';
-
-
 
 const TabsAndAccordions: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
@@ -42,7 +39,37 @@ const TabsAndAccordions: React.FC<Props> = ({ element }) => {
         },
       },
     });
+
   }, [tabs, tabContents, tabHeading, acbHeading, accordions]); // Dependencies to trigger effect
+
+  function emitter() : void{
+
+    dispatch({
+      type: 'UPDATE_ELEMENT',
+      payload: {
+        elementDetails: {
+          ...element,
+          tabs,
+          tabContents,
+          tabHeading,
+          accordionHeading: acbHeading,
+          accordions,
+        },
+      },
+    });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('tcupdated',{roomId,elementId:element.id,
+        tabs,
+        tabContents,
+        tabHeading,
+        acbHeading,
+        accordions,
+        updatedElements});
+    }, 0);
+    
+  }
 
   const handleDeleteTab = (index: number) => {
     setTabs((prev) => prev.filter((_, i) => i !== index));
@@ -50,10 +77,13 @@ const TabsAndAccordions: React.FC<Props> = ({ element }) => {
     if (activeTab >= index) {
       setActiveTab(Math.max(0, activeTab - 1));
     }
+    emitter();
   };
 
   const handleDeleteAccordion = (index: number) => {
     setAccordions((prev) => prev.filter((_, i) => i !== index));
+    emitter();
+
   };
 
   const handleToggleAccordion = (index: number) => {
@@ -62,6 +92,8 @@ const TabsAndAccordions: React.FC<Props> = ({ element }) => {
         i === index ? { ...acc, open: !acc.open } : acc
       )
     );
+    emitter();
+
   };
 
   const handleDeleteContainer = () => {
@@ -70,15 +102,16 @@ const TabsAndAccordions: React.FC<Props> = ({ element }) => {
       payload: { elementDetails: element },
     });
 
-    
+
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: element,  
       });
-      }, 0);
+    }, 0);
 
 
   };
@@ -89,21 +122,72 @@ const TabsAndAccordions: React.FC<Props> = ({ element }) => {
       type: 'CHANGE_CLICKED_ELEMENT',
       payload: { elementDetails: element },
     });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
+    });
   };
 
   const handleTabChange = (index: number, value: string) => {
     setTabs((prev) => prev.map((tab, i) => (i === index ? value : tab)));
+    emitter();
+
   };
 
   const handleTabContentChange = (index: number, value: string) => {
     setTabContents((prev) => prev.map((content, i) => (i === index ? value : content)));
+    emitter();
+
   };
 
   const handleAccordionChange = (index: number, field: 'title' | 'content', value: string) => {
     setAccordions((prev) =>
       prev.map((acc, i) => (i === index ? { ...acc, [field]: value } : acc))
     );
+    emitter();
+
   };
+
+  useEffect(() => {
+          const handleTextUpdate = ({ elementId,         
+          tabs,
+          tabContents,
+          tabHeading,
+          acbHeading,
+          accordions,
+          }: { elementId: string; tabs :any , tabContents : any, tabHeading : any,
+          acbHeading : any, accordions : any, updatedElements : any
+           }) => {
+            if (elementId === element.id) {
+              setTabs(tabs)
+              setTabContents(tabContents)
+              setActiveTab(activeTab)
+              setTabHeading(tabHeading)
+              setACHeading(acbHeading)
+              setAccordions(accordions)
+  
+              dispatch({
+                type: 'UPDATE_ELEMENT',
+                payload: {
+                  elementDetails: {
+                    ...element,
+                    tabs,
+                    tabContents,
+                    tabHeading,
+                    acbHeading,
+                    accordions,
+                  },
+                },
+              });
+
+            }
+          };
+          socket.on('tcupdated', handleTextUpdate);
+          return () => {
+            socket.off('tcupdated', handleTextUpdate);
+          };
+        }, [socket, element.id, dispatch]);
 
   return (
     <section

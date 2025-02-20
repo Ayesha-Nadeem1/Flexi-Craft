@@ -10,7 +10,6 @@ import { Props } from './types';
 import { useSocket } from '../../SocketContext';
 import { useParams } from 'react-router-dom';
 
-
 type ImageCarousel = {
   imageUrl: string;
   linkUrl?: string;
@@ -28,23 +27,77 @@ const CarouselAndSliders: React.FC<Props> = ({ element }) => {
   const [carouselTitle, setCarouselTitle] = useState<string>(element.title || 'Image Carousel');
   const [titleColor, setTitleColor] = useState<string>(element.titleColor || '#000000');
   
-  useEffect(() => {
-    // Update the element with the new properties when they change
+  /*useEffect(() => {
     dispatch({
       type: 'UPDATE_ELEMENT',
       payload: {
         elementDetails: {
-          ...element,  // Spread existing element properties
-          imageCarousels,  // Update the imageCarousels
-          title: carouselTitle,  // Update the title
-          titleColor,  // Update the titleColor
+          ...element,  
+          imageCarousels,  
+          title: carouselTitle, 
+          titleColor,  
         },
       },
     });
-  }, [imageCarousels, carouselTitle, titleColor, dispatch, element]);
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('carouselupdated',{roomId,elementId:element.id,updatedimgcarousels : imageCarousels,
+      updatedtitle : carouselTitle, updatedtitlecolor : titleColor, updatedElements});
+    }, 0);
+
+
+  }, [imageCarousels, carouselTitle, titleColor, dispatch, element]);*/
+
+    useEffect(() => {
+        const handleTextUpdate = ({ elementId, updatedimgcarousels,
+        updatedtitle, updatedtitlecolor }: { elementId: string; updatedimgcarousels :any ,
+        updatedtitle: any, updatedtitlecolor: any }) => {
+          if (elementId === element.id) {
+            setImageCarousels(updatedimgcarousels)
+            setCarouselTitle(updatedtitle)
+            setTitleColor(updatedtitlecolor)
+
+            dispatch({
+              type: 'UPDATE_ELEMENT',
+              payload: {
+                elementDetails: {
+                  ...element,  
+                  updatedimgcarousels,  
+                  title: updatedtitle, 
+                  updatedtitlecolor,  
+                },
+              },
+            });
+          }
+        };
+        socket.on('carouselupdated', handleTextUpdate);
+        return () => {
+          socket.off('carouselupdated', handleTextUpdate);
+        };
+      }, [socket, element.id, dispatch]);
   
   const handleDeleteImage = (index: number) => {
     setImageCarousels((prevImages) => prevImages.filter((_, i) => i !== index));
+
+    dispatch({
+      type: 'UPDATE_ELEMENT',
+      payload: {
+        elementDetails: {
+          ...element,  
+          imageCarousels,  
+          //title: carouselTitle, 
+          //titleColor,  
+        },
+      },
+    });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('carouselupdated',{roomId,elementId:element.id,updatedimgcarousels : imageCarousels,
+      updatedtitle : carouselTitle, updatedtitlecolor : titleColor, updatedElements});
+    }, 0);
+
   };
 
   const handleDeleteContainer = () => {
@@ -55,12 +108,13 @@ const CarouselAndSliders: React.FC<Props> = ({ element }) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: element,  
       });
-      }, 0);
+    }, 0);
       
   };
 
@@ -70,16 +124,59 @@ const CarouselAndSliders: React.FC<Props> = ({ element }) => {
       type: 'CHANGE_CLICKED_ELEMENT',
       payload: { elementDetails: element },
     });
+
+    
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
+    });
   };
 
   const handleImageUrlChange = (index: number, url: string) => {
     setImageCarousels((prevImages) =>
       prevImages.map((img, i) => (i === index ? { ...img, imageUrl: url } : img))
     );
+
+    dispatch({
+      type: 'UPDATE_ELEMENT',
+      payload: {
+        elementDetails: {
+          ...element,  
+          imageCarousels,  
+          //title: carouselTitle, 
+          //titleColor,  
+        },
+      },
+    });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('carouselupdated',{roomId,elementId:element.id,updatedimgcarousels : imageCarousels,
+      updatedtitle : carouselTitle, updatedtitlecolor : titleColor, updatedElements});
+    }, 0);
+
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCarouselTitle(e.target.value);
+
+    dispatch({
+      type: 'UPDATE_ELEMENT',
+      payload: {
+        elementDetails: {
+          ...element,  
+          //imageCarousels,  
+          title: carouselTitle, 
+          //titleColor,  
+        },
+      },
+    });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('carouselupdated',{roomId,elementId:element.id,updatedimgcarousels : imageCarousels,
+      updatedtitle : carouselTitle, updatedtitlecolor : titleColor, updatedElements});
+    }, 0);
   };
 
   const handleTitleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {

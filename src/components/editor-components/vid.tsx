@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge'
 import { EditorElement, useEditor } from '../../pages/editor-provider'
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';
 import { useParams } from 'react-router-dom';
@@ -32,6 +32,13 @@ const MediaComponent = (props: Props) => {
         elementDetails: props.element,
       },
     });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
+
+
   };
 
   const handleDeleteElement = () => {
@@ -42,12 +49,13 @@ const MediaComponent = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
       
   };
 
@@ -80,6 +88,13 @@ const MediaComponent = (props: Props) => {
         },
       },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('textUpdated',{roomId,elementId:props.element.id,updatedText: embedUrl,updatedElements});
+    }, 0);
+
+
   };
   
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,22 +109,42 @@ const MediaComponent = (props: Props) => {
         },
       },
     });
+
   };
-  
-  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newHeight = e.target.value;
-    setImageHeight(newHeight);
-    dispatch({
-      type: 'UPDATE_ELEMENT',
-      payload: {
-        elementDetails: {
-          ...props.element,
-          imageHeight: newHeight,
+
+
+
+    useEffect(() => {
+      const handleTextUpdate = ({ elementId, updatedText }: { elementId: string; updatedText: string }) => {
+        if (elementId === props.element.id) {
+          console.log("Received update:", updatedText);
+          console.log("Received id:", elementId);
+          setMediaUrl(updatedText);
+        }
+      };
+      socket.on('textUpdated', handleTextUpdate);
+      return () => {
+        socket.off('textUpdated', handleTextUpdate);
+      };
+    }, [socket, props.element.id, dispatch]);
+
+    const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newHeight = e.target.value;
+      setImageHeight(newHeight);
+      dispatch({
+        type: 'UPDATE_ELEMENT',
+        payload: {
+          elementDetails: {
+            ...props.element,
+            imageHeight: newHeight,
+          },
         },
-      },
-    });
-  };
+      });
+    };
+    
   
+
+
 
   return (
     <div

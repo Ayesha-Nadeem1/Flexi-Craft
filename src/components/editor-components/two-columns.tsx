@@ -88,6 +88,11 @@ const TwoColumns = (props: Props) => {
         elementDetails: props.element,
       },
     })
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
   }
 
   return (

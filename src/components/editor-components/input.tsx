@@ -17,8 +17,6 @@ const InputComponent = (props: Props) => {
   const socket = useSocket();
   const { roomId } = useParams();
 
-
-
   const handleDragStart = (e: React.DragEvent, type: EditorBtns) => {
     if (type === null) return
     e.dataTransfer.setData('componentType', type)
@@ -32,6 +30,12 @@ const InputComponent = (props: Props) => {
         elementDetails: props.element,
       },
     })
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
+    
   }
 
   const styles = props.element.styles
@@ -43,13 +47,14 @@ const InputComponent = (props: Props) => {
     })
 
     
-  setTimeout(() => {
-    const updatedElements = JSON.stringify(state.editor.elements);
-    
-    socket.emit('componentDeleted', {
-    roomId,
-    updatedElements,
-    });
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+  
+      socket.emit('componentDeleted', {
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
+      });
     }, 0);
 
 

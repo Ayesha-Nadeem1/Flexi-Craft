@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DOMPurify from 'dompurify';
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';
@@ -26,12 +26,13 @@ const TestimonialComponent: React.FC<Props> = (props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
       
   };
 
@@ -43,10 +44,14 @@ const TestimonialComponent: React.FC<Props> = (props) => {
         elementDetails: props.element,
       },
     });
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
   };
 
   // Using optimizedcontent approach
-  const handleUpdateContent = (field: 'quote' | 'author', e: React.FocusEvent<HTMLDivElement>) => {
+  const handleUpdateContent = (field: 'quote' | 'author', e: React.FormEvent<HTMLDivElement>) => {
     const divElement = e.target as HTMLDivElement;
 
     // Create a new object with sanitized content
@@ -62,6 +67,10 @@ const TestimonialComponent: React.FC<Props> = (props) => {
           },
       },
     });
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('HeaderUpdated',{roomId,elementId:props.element.id,updatedText : sanitizedContent,field,updatedElements});
+    }, 0);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,6 +93,29 @@ const TestimonialComponent: React.FC<Props> = (props) => {
       reader.readAsDataURL(file);
     }
   };
+
+  useEffect(() => {
+          const handleTextUpdate = ({ elementId, field ,updatedText }: { elementId: string; field:any, updatedText: string }) => {
+            if (elementId === props.element.id) {
+  
+              dispatch({
+                type: 'UPDATE_ELEMENT',
+                payload: {
+                  elementDetails: {
+                    ...props.element,
+          
+                      [field]: updatedText,
+                    },
+                },
+              });
+  
+            }
+          };
+          socket.on('HeaderUpdated', handleTextUpdate);
+          return () => {
+            socket.off('HeaderUpdated', handleTextUpdate);
+          };
+        }, [socket, props.element.id, dispatch]);
 
   const styles = props.element.styles;
 
@@ -137,20 +169,32 @@ const TestimonialComponent: React.FC<Props> = (props) => {
         <div className="ml-4">
           <p
             contentEditable={!state.editor.liveMode}
-            onBlur={(e) => handleUpdateContent('quote', e)}
+            suppressContentEditableWarning={true}
+            onInput={(e) => handleUpdateContent('quote', e)}
             className="text-lg italic"
+          >
+            <span
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(props.element.quote || 'This is a fantastic service!'),
+            __html: DOMPurify.sanitize(props.element.quote || 'This is a fantastic service!'),
             }}
-          />
+            dir='ltr'
+            suppressContentEditableWarning={true}
+            />
+          </p>
           <p
             contentEditable={!state.editor.liveMode}
-            onBlur={(e) => handleUpdateContent('author', e)}
+            suppressContentEditableWarning={true}
+            onInput={(e) => handleUpdateContent('author', e)}
             className="text-md font-semibold mt-2"
+          >
+            <span
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(props.element.author || 'John Doe'),
+            __html: DOMPurify.sanitize(props.element.author || 'John Doe'),
             }}
-          />
+            dir='ltr'
+            suppressContentEditableWarning={true}
+            />
+          </p>
         </div>
       </div>
 

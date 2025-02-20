@@ -1,10 +1,9 @@
 'use client'
-
 import { Badge } from '../ui/badge'
 import { EditorElement, useEditor } from '../../pages/editor-provider'
 import clsx from 'clsx'
 import { Trash } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';
 import { useParams } from 'react-router-dom';
@@ -23,7 +22,6 @@ const GridAndCards: React.FC<Props> = ({ element }) => {
   const { roomId } = useParams();
 
 
-
   const handleDeleteCard = (index: number) => {
     const updatedCards = cards.filter((_, i) => i !== index)
     setCards(updatedCards)
@@ -33,8 +31,6 @@ const GridAndCards: React.FC<Props> = ({ element }) => {
         elementDetails: { ...element, cards: updatedCards },
       },
     })
-
-    
   }
 
   const handleDeleteContainer = () => {
@@ -45,12 +41,13 @@ const GridAndCards: React.FC<Props> = ({ element }) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: element,  
       });
-      }, 0);
+    }, 0);
   }
 
   const handleOnClickBody = (e: React.MouseEvent) => {
@@ -59,6 +56,11 @@ const GridAndCards: React.FC<Props> = ({ element }) => {
       type: 'CHANGE_CLICKED_ELEMENT',
       payload: { elementDetails: element },
     })
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
+    });
   }
 
   const handleColorChange = (color: string) => {
@@ -82,6 +84,11 @@ const GridAndCards: React.FC<Props> = ({ element }) => {
         elementDetails: { ...element, cards: updatedCards },
       },
     })
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('textUpdated',{roomId,elementId:element.id,updatedText : updatedCards,updatedElements});
+    }, 0);
   }
 
   const handleTitleChange = (index: number, title: string) => {
@@ -95,6 +102,10 @@ const GridAndCards: React.FC<Props> = ({ element }) => {
         elementDetails: { ...element, cards: updatedCards },
       },
     })
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('textUpdated',{roomId,elementId:element.id,updatedText : updatedCards,updatedElements});
+    }, 0);
   }
 
   const handleDescriptionChange = (index: number, description: string) => {
@@ -108,7 +119,32 @@ const GridAndCards: React.FC<Props> = ({ element }) => {
         elementDetails: { ...element, cards: updatedCards },
       },
     })
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('textUpdated',{roomId,elementId:element.id,updatedText : updatedCards,updatedElements});
+    }, 0);
   }
+
+  useEffect(() => {
+      const handleTextUpdate = ({ elementId, updatedText }: { elementId: string; updatedText: any }) => {
+        console.log("card", updatedText)
+        setCards(updatedText)
+        if (elementId === element.id) {
+          dispatch({
+            type: 'UPDATE_ELEMENT',
+            payload: {
+              elementDetails: { ...element, cards: updatedText },
+            },
+          })
+        }
+      };
+      socket.on('textUpdated', handleTextUpdate);
+      return () => {
+        socket.off('textUpdated', handleTextUpdate);
+      };
+    }, [socket, element.id, dispatch]);
+
+
 
   return (
     <section

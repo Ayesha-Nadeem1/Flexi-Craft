@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import DOMPurify from 'dompurify';
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';
@@ -24,14 +24,13 @@ const ValuePropositionSection = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
-      
-
+    }, 0);
 
   };
 
@@ -43,9 +42,15 @@ const ValuePropositionSection = (props: Props) => {
         elementDetails: props.element,
       },
     });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
+
   };
 
-  const handleUpdateContent = (field: 'ftitle' | 'fdescription' | 'value1' | 'value2' | 'value3' | 'value4' | `${'value1' | 'value2' | 'value3' | 'value4'}Description`, e: React.FocusEvent<HTMLDivElement>) => {
+  const handleUpdateContent = (field: 'ftitle' | 'fdescription' | 'value1' | 'value2' | 'value3' | 'value4' | `${'value1' | 'value2' | 'value3' | 'value4'}Description`, e: React.FormEvent<HTMLDivElement>) => {
     const divElement = e.target as HTMLDivElement;
     const sanitizedText = DOMPurify.sanitize(divElement.innerText);
     dispatch({
@@ -57,7 +62,37 @@ const ValuePropositionSection = (props: Props) => {
         },
       },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('HeaderUpdated',{roomId,elementId:props.element.id,updatedText : sanitizedText,field,updatedElements});
+    }, 0);
   };
+
+    useEffect(() => {
+          const handleTextUpdate = ({ elementId, field ,updatedText }: { elementId: string; field:any, updatedText: string }) => {
+            console.log("updatee", updatedText)
+            console.log("updatee", field)
+
+            if (elementId === props.element.id) {
+  
+              dispatch({
+                type: 'UPDATE_ELEMENT',
+                payload: {
+                  elementDetails: {
+                    ...props.element,
+                    [field]: updatedText,
+                  },
+                },
+              });
+  
+            }
+          };
+          socket.on('HeaderUpdated', handleTextUpdate);
+          return () => {
+            socket.off('HeaderUpdated', handleTextUpdate);
+          };
+        }, [socket, props.element.id, dispatch]);
 
   const styles = props.element.styles;
 
@@ -83,40 +118,63 @@ const ValuePropositionSection = (props: Props) => {
 
       <h2
         contentEditable={!state.editor.liveMode}
-        onBlur={(e) => handleUpdateContent('ftitle', e)}
+        suppressContentEditableWarning={true}
+        onInput={(e) => handleUpdateContent('ftitle', e)}
         className="text-3xl font-semibold mb-4"
+      >
+        <span
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(props.element.ftitle || 'Your Value Proposition Title'),
+        __html: DOMPurify.sanitize(props.element.ftitle || 'Your Value Proposition Title'),
         }}
-      />
+        dir = 'ltr'
+        />
+
+      </h2>
       <p
         contentEditable={!state.editor.liveMode}
-        onBlur={(e) => handleUpdateContent('fdescription', e)}
+        suppressContentEditableWarning={true}
+        onInput={(e) => handleUpdateContent('fdescription', e)}
         className="text-lg mb-8"
+      >
+        <span
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(props.element.fdescription || 'A compelling description of the value you offer to your customers.'),
+        __html: DOMPurify.sanitize(props.element.fdescription || 'A compelling description of the value you offer to your customers.'),
         }}
-      />
+        dir='ltr'
+        />
+
+      </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {['value1', 'value2', 'value3', 'value4'].map((valueKey, index) => (
           <div key={index} className="p-6 border rounded-lg bg-white shadow-md">
             <h3
               contentEditable={!state.editor.liveMode}
-              onBlur={(e) => handleUpdateContent(valueKey as 'value1' | 'value2' | 'value3' | 'value4', e)}
+              suppressContentEditableWarning={true}
+              onInput={(e) => handleUpdateContent(valueKey as 'value1' | 'value2' | 'value3' | 'value4', e)}
               className="text-xl font-semibold mb-2"
+            >
+              <span
               dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(props.element[valueKey] || `Core Value ${index + 1}`),
+              __html: DOMPurify.sanitize(props.element[valueKey] || `Core Value ${index + 1}`),
               }}
-            />
+              dir='ltr'
+              />
+
+            </h3>
             <p
               contentEditable={!state.editor.liveMode}
-              onBlur={(e) => handleUpdateContent(`${valueKey}Description` as `${'value1' | 'value2' | 'value3' | 'value4'}Description`, e)}
+              suppressContentEditableWarning={true}
+              onInput={(e) => handleUpdateContent(`${valueKey}Description` as `${'value1' | 'value2' | 'value3' | 'value4'}Description`, e)}
               className="text-gray-600"
+            >
+              <span
               dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(props.element[`${valueKey}Description`] || 'Description of core value.'),
+              __html: DOMPurify.sanitize(props.element[`${valueKey}Description`] || 'Description of core value.'),
               }}
-            />
+              dir='ltr'
+              />
+            </p> 
           </div>
         ))}
       </div>

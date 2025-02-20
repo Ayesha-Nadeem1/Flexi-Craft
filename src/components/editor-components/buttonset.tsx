@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';
 import { useParams } from 'react-router-dom';
@@ -23,12 +23,13 @@ const ButtonSet: React.FC<Props> = ({ element }) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: element,  
       });
-      }, 0);
+    }, 0);
       
   };
 
@@ -40,9 +41,13 @@ const ButtonSet: React.FC<Props> = ({ element }) => {
         elementDetails: element,
       },
     });
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
+    });
   };
 
-  const handleUpdateContent = (field: string, e: React.FocusEvent<HTMLDivElement>) => {
+  const handleUpdateContent = (field: string, e: React.FormEvent<HTMLDivElement>) => {
     const divElement = e.target as HTMLDivElement;
 
     // Using optimizedcontent approach to update
@@ -54,7 +59,35 @@ const ButtonSet: React.FC<Props> = ({ element }) => {
         elementDetails: newContent,
       },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('textUpdated',{roomId,elementId:element.id,updatedText : newContent,updatedElements});
+    }, 0);
   };
+
+    useEffect(() => {
+      const handleTextUpdate = ({ elementId, updatedText }: { elementId: string; updatedText: string }) => {
+  
+        if (elementId === element.id) {
+          dispatch({
+            type: 'UPDATE_ELEMENT',
+            payload: {
+              elementDetails: {
+                ...element,
+                  buttontext: updatedText,
+                },
+            },
+          });
+        }
+      };
+    
+      socket.on('textUpdated', handleTextUpdate);
+    
+      return () => {
+        socket.off('textUpdated', handleTextUpdate);
+      };
+    }, [socket, element.id, dispatch]);
 
   const styles = element.styles;
 
@@ -85,7 +118,7 @@ const ButtonSet: React.FC<Props> = ({ element }) => {
               key={buttonKey}
               contentEditable={!state.editor.liveMode}
               suppressContentEditableWarning={true}
-              onBlur={(e) => handleUpdateContent(buttonKey, e)}
+              onInput={(e) => handleUpdateContent(buttonKey, e)}
               className="bg-transparent text-black py-2 px-4 rounded-md hover:bg-primary-dark border border-black"
               role="button"
               tabIndex={0} // Make it focusable

@@ -13,12 +13,8 @@ import { useParams } from 'react-router-dom';
 
 const StepsSection: React.FC<Props> = ({ element }) => {
   const { dispatch, state } = useEditor();
-
-  
   const socket = useSocket();
   const { roomId } = useParams();
-
-
   const [steps, setSteps] = useState<{ title: string; description: string }[]>(element.steps || [
       { title: 'Step 1', description: 'Description for Step 1' },
       { title: 'Step 2', description: 'Description for Step 2' },
@@ -26,7 +22,6 @@ const StepsSection: React.FC<Props> = ({ element }) => {
   ]);
   const [StepHeading, setStepHeading] = useState(element.stepHeading || 'Steps');
 
-  // useEffect to dispatch changes to the editor context
   useEffect(() => {
     dispatch({
       type: 'UPDATE_ELEMENT',
@@ -48,10 +43,54 @@ const StepsSection: React.FC<Props> = ({ element }) => {
           : step
       )
     );
+
+    dispatch({
+      type: 'UPDATE_ELEMENT',
+      payload: {
+        elementDetails: {
+          ...element,
+          steps,
+          stepHeading: StepHeading,
+        },
+      },
+    });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('stepsupdated',{
+        roomId,
+        elementId:element.id,
+        steps,
+        StepHeading,
+        updatedElements});
+    }, 0);
+
   };
 
   const handleDeleteStep = (index: number) => {
     setSteps((prev) => prev.filter((_, i) => i !== index));
+
+    dispatch({
+      type: 'UPDATE_ELEMENT',
+      payload: {
+        elementDetails: {
+          ...element,
+          steps,
+          stepHeading: StepHeading,
+        },
+      },
+    });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('stepsupdated',{
+        roomId,
+        elementId:element.id,
+        steps,
+        StepHeading,
+        updatedElements});
+    }, 0);
+
   };
 
   const handleDeleteContainer = () => {
@@ -62,14 +101,13 @@ const StepsSection: React.FC<Props> = ({ element }) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: element,  
       });
-      }, 0);
-      
-
+    }, 0);
 
   };
 
@@ -79,7 +117,38 @@ const StepsSection: React.FC<Props> = ({ element }) => {
       type: 'CHANGE_CLICKED_ELEMENT',
       payload: { elementDetails: element },
     });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
+    });
   };
+
+    useEffect(() => {
+            const handleTextUpdate = ({ elementId,         
+              steps,
+              StepHeading,
+            }: { elementId: string; steps :any ,StepHeading : any }) => {
+              if (elementId === element.id) {
+                setSteps(steps)
+                setStepHeading(StepHeading)
+                dispatch({
+                  type: 'UPDATE_ELEMENT',
+                  payload: {
+                    elementDetails: {
+                      ...element,
+                      steps,
+                      stepHeading: StepHeading,
+                    },
+                  },
+                });
+              }
+            };
+            socket.on('stepsupdated', handleTextUpdate);
+            return () => {
+              socket.off('stepsupdated', handleTextUpdate);
+            };
+          }, [socket, element.id, dispatch]);
 
   return (
     <section

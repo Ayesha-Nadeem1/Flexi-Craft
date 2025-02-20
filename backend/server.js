@@ -82,9 +82,47 @@ io.on('connection', (socket) => {
     socket.to(roomId).emit('elementClicked', { roomId, selectedElement });
   });
 
+  socket.on('carouselupdated', ({ roomId, elementId, updatedimgcarousels,
+     updatedtitle, updatedtitlecolor, updatedElements}) => {
+    socket.to(roomId).emit('syncState', { roomId, updatedElements });
+    socket.to(roomId).emit('carouselupdated', { elementId, updatedimgcarousels,
+    updatedtitle, updatedtitlecolor, });
+  });
+
+  socket.on('tcupdated', ({ 
+    roomId, 
+    elementId,  
+    tabs,
+    tabContents,
+    tabHeading,
+    acbHeading,
+    accordions,
+    updatedElements}) => {
+    socket.to(roomId).emit('syncState', { roomId, updatedElements });
+    socket.to(roomId).emit('tcupdated', { 
+    elementId,  
+    tabs,
+    tabContents,
+    tabHeading,
+    acbHeading,
+    accordions, 
+    });
+ });
+
   socket.on('textUpdated', ({ roomId, elementId, updatedText, updatedElements }) => {
     socket.to(roomId).emit('syncState', { roomId, updatedElements });
     socket.to(roomId).emit('textUpdated', { elementId, updatedText });
+  });
+
+  socket.on('stepsupdated', ({roomId, elementId, steps, StepHeading, updatedElements }) => {
+    socket.to(roomId).emit('syncState', { roomId, updatedElements });
+    socket.to(roomId).emit('stepsupdated', { elementId, steps, StepHeading });
+  });
+
+
+  socket.on('HeaderUpdated', ({ roomId, elementId, updatedText, field,updatedElements }) => {
+    socket.to(roomId).emit('syncState', { roomId, updatedElements });
+    socket.to(roomId).emit('HeaderUpdated', { elementId, updatedText, field });
   });
 
   socket.on('componentDropped', ({ roomId, updatedElements, addedElement, containerId }) => {

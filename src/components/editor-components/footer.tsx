@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import DOMPurify from 'dompurify';  // Import DOMPurify
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';
@@ -31,12 +31,13 @@ const FooterComponent = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
 
       
   }, [dispatch, props.element]);
@@ -48,6 +49,11 @@ const FooterComponent = (props: Props) => {
       payload: {
         elementDetails: props.element,
       },
+    });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
     });
   };
 
@@ -63,6 +69,11 @@ const FooterComponent = (props: Props) => {
           },
         },
       });
+      setTimeout(() => {
+        const updatedElements = JSON.stringify(state.editor.elements);
+        socket.emit('HeaderUpdated',{roomId,elementId:props.element.id,updatedText : updatedContent,field,updatedElements});
+      }, 0);
+
     },
     [dispatch, props.element]
   );
@@ -71,6 +82,29 @@ const FooterComponent = (props: Props) => {
     const newColor = e.target.value;
     setTextColor(newColor);
   };
+
+  useEffect(() => {
+    const handleTextUpdate = ({ elementId, field ,updatedText }: { elementId: string; field:any, updatedText: string }) => {
+          if (elementId === props.element.id) {
+  
+              dispatch({
+                type: 'UPDATE_ELEMENT',
+                payload: {
+                  elementDetails: {
+                    ...props.element,
+                    [field]: updatedText,
+                  },
+                },
+              });
+  
+            }
+          };
+          socket.on('HeaderUpdated', handleTextUpdate);
+          return () => {
+            socket.off('HeaderUpdated', handleTextUpdate);
+          };
+        }, [socket, props.element.id, dispatch]);
+  
 
   const styles = { ...props.element.styles, color: textColor };
 
@@ -98,20 +132,28 @@ const FooterComponent = (props: Props) => {
         suppressContentEditableWarning={true}
         onInput={(e) => handleUpdateContent('footerText', e)}  // Update footerText
         className="text-lg mb-4"
+      >
+        <span
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(props.element.footerText || 'Footer text goes here.'), // Sanitize the input
+        __html: DOMPurify.sanitize(props.element.footerText || 'Footer text goes here.'), // Sanitize the input
         }}
-      />
+        dir='ltr'
+        />
+      </p>
 
       <p
         contentEditable={!state.editor.liveMode}
         suppressContentEditableWarning={true}
         onInput={(e) => handleUpdateContent('footerTagline', e)}  // Update footerTagline
         className="text-sm mb-2"
+      >
+        <span
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(props.element.footerTagline || 'Your tagline or additional info.'), // Sanitize the input
+        __html: DOMPurify.sanitize(props.element.footerTagline || 'Your tagline or additional info.'), // Sanitize the input
         }}
-      />
+        dir='ltr'
+        />
+      </p>
 
       <nav className="flex gap-4 mt-4">
         <a href="#privacy" className="text-black hover:underline">Privacy Policy</a>

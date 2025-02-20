@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import DOMPurify from 'dompurify';
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';
@@ -17,6 +17,7 @@ const HeroSection = (props: Props) => {
   const socket = useSocket();
   const { roomId } = useParams();
 
+
   const handleDeleteElement = () => {
     dispatch({
       type: 'DELETE_ELEMENT',
@@ -25,12 +26,14 @@ const HeroSection = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
+
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {
@@ -41,11 +44,18 @@ const HeroSection = (props: Props) => {
         elementDetails: props.element,
       },
     });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
   };
 
-  const handleUpdateContent = (field: 'herotitle' | 'herotagline', e: React.FocusEvent<HTMLDivElement>) => {
+  const handleUpdateContent = (field: 'herotitle' | 'herotagline', e: React.FormEvent<HTMLDivElement>) => {
     const divElement = e.target as HTMLDivElement;
     const sanitizedText = DOMPurify.sanitize(divElement.innerText);
+    divElement.style.direction = 'ltr';
+
     dispatch({
       type: 'UPDATE_ELEMENT',
       payload: {
@@ -55,7 +65,34 @@ const HeroSection = (props: Props) => {
         },
       },
     });
+    
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('HeaderUpdated',{roomId,elementId:props.element.id,updatedText : sanitizedText,field,updatedElements});
+    }, 0);
   };
+
+
+      useEffect(() => {
+        const handleTextUpdate = ({ elementId, field ,updatedText }: { elementId: string; field:any, updatedText: string }) => {
+          if (elementId === props.element.id) {
+            dispatch({
+              type: 'UPDATE_ELEMENT',
+              payload: {
+                elementDetails: {
+                  ...props.element,
+                  [field]: updatedText, // Update heading or subheading directly
+                },
+              },
+            });
+      
+          }
+        };
+        socket.on('HeaderUpdated', handleTextUpdate);
+        return () => {
+          socket.off('HeaderUpdated', handleTextUpdate);
+        };
+      }, [socket, props.element.id, dispatch]);
 
   const styles = props.element.styles;
 
@@ -81,20 +118,36 @@ const HeroSection = (props: Props) => {
 
       <h1
         contentEditable={!state.editor.liveMode}
-        onBlur={(e) => handleUpdateContent('herotitle', e)}
+        suppressContentEditableWarning={true}
+        onInput={(e) => handleUpdateContent('herotitle', e)}
         className="text-4xl font-bold mb-4"
+      >
+        <span
         dangerouslySetInnerHTML={{
           __html: DOMPurify.sanitize(props.element.herotitle || 'Your Main Heading Here'),
         }}
-      />
+        dir='ltr'
+        suppressContentEditableWarning={true}
+
+        />
+      </h1>
       <p
         contentEditable={!state.editor.liveMode}
-        onBlur={(e) => handleUpdateContent('herotagline', e)}
+        suppressContentEditableWarning={true}
+
+        onInput={(e) => handleUpdateContent('herotagline', e)}
         className="text-xl mb-8"
+      >
+        <span
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(props.element.herotagline || 'Your compelling subheading goes here.'),
+        __html: DOMPurify.sanitize(props.element.herotagline || 'Your compelling subheading goes here.'),
         }}
-      />
+        dir='ltr'
+        suppressContentEditableWarning={true}
+
+        />
+      </p>
+
       <div className="flex gap-6">
         <a href="#learn-more" className="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark">Learn More</a>
         <a href="#learn-more" className="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark">Get In Touch</a>

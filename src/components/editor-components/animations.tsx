@@ -42,10 +42,11 @@ const AnimationSet = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-    
+  
       socket.emit('componentDeleted', {
         roomId,
         updatedElements,
+        deletedElement: props.element,  
       });
     }, 0);
   
@@ -59,6 +60,12 @@ const AnimationSet = (props: Props) => {
         elementDetails: props.element,
       },
     })
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
+
   }
 
   const renderAnimation = (type: string) => {

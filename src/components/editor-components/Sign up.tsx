@@ -33,15 +33,14 @@ const SignUpComponent = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
       
-
-
 
   }, [dispatch, props.element]);
 
@@ -52,6 +51,10 @@ const SignUpComponent = (props: Props) => {
       payload: {
         elementDetails: props.element,
       },
+    });
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
     });
   };
 

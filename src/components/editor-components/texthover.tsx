@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DOMPurify from 'dompurify'; // Import DOMPurify
 import './Animationtext.css';
 import { Props } from './types'; 
@@ -37,12 +37,13 @@ const Texthover = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
   };
 
   const handleOnClickBody = (e: React.MouseEvent) => {
@@ -53,10 +54,18 @@ const Texthover = (props: Props) => {
         elementDetails: props.element,
       },
     });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
+
   };
 
-  const handleTextChange = (e: React.FocusEvent<HTMLDivElement>, index: number) => {
-    const newText = DOMPurify.sanitize(e.target.innerHTML); // Sanitize the input
+  const handleTextChange = (e: React.FormEvent<HTMLDivElement>, index: number) => {
+    const element = e.target as HTMLDivElement;
+    const newText = DOMPurify.sanitize(element.innerText)
+
     dispatch({
       type: 'UPDATE_ELEMENT',
       payload: {
@@ -64,12 +73,40 @@ const Texthover = (props: Props) => {
           ...props.element,
           content: {
             ...props.element.content,
-            [index === 0 ? 'feature1' : `feature${index + 1}`]: newText, // Adjust according to your logic
+            [index === 0 ? 'feature1' : `feature${index + 1}`]: newText, 
           },
         },
       },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('HeaderUpdated',{roomId,elementId:props.element.id,updatedText : newText,field: index,updatedElements});
+    }, 0);
   };
+
+  useEffect(() => {
+     const handleTextUpdate = ({ elementId, field ,updatedText }: { elementId: string; field:any, updatedText: string }) => {
+        if (elementId === props.element.id) {
+          dispatch({
+            type: 'UPDATE_ELEMENT',
+            payload: {
+              elementDetails: {
+                ...props.element,
+                content: {
+                  ...props.element.content,
+                  [field === 0 ? 'feature1' : `feature${field + 1}`]: updatedText, // Adjust according to your logic
+                },
+              },
+            },
+          });    
+            }
+          };
+     socket.on('HeaderUpdated', handleTextUpdate);
+     return () => {
+        socket.off('HeaderUpdated', handleTextUpdate);
+        };
+      }, [socket, props.element.id, dispatch]);
 
   const renderContent = () => {
     switch (concept) {
@@ -81,7 +118,7 @@ const Texthover = (props: Props) => {
             ))}
             <h1
               contentEditable={!state.editor.liveMode}
-              onBlur={(e) => handleTextChange(e as any, 0)}
+              onInput={(e) => handleTextChange(e as any, 0)}
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize('Desert') }} // Sanitize the default text
             />
           </div>
@@ -93,7 +130,7 @@ const Texthover = (props: Props) => {
               <div key={index} className={`hover hover-${index + 1}`}>
                 <h1
                   contentEditable={!state.editor.liveMode}
-                  onBlur={(e) => handleTextChange(e as any, index)}
+                  onInput={(e) => handleTextChange(e as any, index)}
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(val) }} // Sanitize each letter
                 />
               </div>
@@ -110,7 +147,7 @@ const Texthover = (props: Props) => {
                   <div></div>
                   <h1
                     contentEditable={!state.editor.liveMode}
-                    onBlur={(e) => handleTextChange(e as any, index)}
+                    onInput={(e) => handleTextChange(e as any, index)}
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(val) }} // Sanitize each letter
                   />
                 </div>
@@ -124,7 +161,7 @@ const Texthover = (props: Props) => {
             <h1
               contentEditable={!state.editor.liveMode}
               className={`hover hover-${Math.floor(Math.random() * 3) + 1}`}
-              onBlur={(e) => handleTextChange(e as any, 0)}
+              onInput={(e) => handleTextChange(e as any, 0)}
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize('Glacier') }} // Sanitize the default text
             />
           </div>
@@ -138,7 +175,7 @@ const Texthover = (props: Props) => {
                   key={index}
                   className={`char hover hover-${index + 1}`}
                   contentEditable={!state.editor.liveMode}
-                  onBlur={(e) => handleTextChange(e as any, index)}
+                  onInput={(e) => handleTextChange(e as any, index)}
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(val) }} // Sanitize each letter
                 />
               ))}
@@ -154,7 +191,7 @@ const Texthover = (props: Props) => {
                   key={index}
                   className={`char hover hover-${index + 1}`}
                   contentEditable={!state.editor.liveMode}
-                  onBlur={(e) => handleTextChange(e as any, index)}
+                  onInput={(e) => handleTextChange(e as any, index)}
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(val) }} // Sanitize each letter
                 />
               ))}
@@ -167,7 +204,7 @@ const Texthover = (props: Props) => {
             <h1
               contentEditable={!state.editor.liveMode}
               className={`hover hover-${Math.floor(Math.random() * 3) + 1}`}
-              onBlur={(e) => handleTextChange(e as any, 0)}
+              onInput={(e) => handleTextChange(e as any, 0)}
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize('Fries') }} // Sanitize the default text
             />
           </div>

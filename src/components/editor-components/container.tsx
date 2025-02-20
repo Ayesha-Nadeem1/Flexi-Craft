@@ -13,18 +13,12 @@ import { Socket } from 'socket.io-client';
 import { useSocket } from '../../SocketContext';  // Import the socket context
 
 
-
-
-
 type Props = { element: EditorElement }
 
 const Container = ({ element }: Props) => {
   const { id, content, name, styles, type } = element
   const { dispatch, state } = useEditor()
   const  socket  = useSocket(); 
-  const [canvasComponents, setCanvasComponents] = useState<EditorElement[]>([]);  // State to store components on the canvas
-  const socketRef = useRef<Socket | null>(null);
-  const navigate = useNavigate();
   const { roomId } = useParams();
 
 
@@ -59,6 +53,7 @@ useEffect(() => {
 
 
 
+//DELETE
 useEffect(() => {
   const handleElementdel = ({ deletedElement }: { deletedElement: any }) => {
     console.log('Element del:', deletedElement);
@@ -79,7 +74,7 @@ useEffect(() => {
 }, [socket, dispatch]);
 
 
-
+//ADD
 useEffect(() => {
   const handleElementadd = ({ addedElement, containerId }: { addedElement: any, containerId : any }) => {
     console.log('Element add:', addedElement);
@@ -104,9 +99,7 @@ useEffect(() => {
 
 
 
-
-
-
+//HIGHLIGHT
 useEffect(() => {
   const handleElementClick = ({ selectedElement }: { selectedElement: EditorElement }) => {
     console.log('Element clicked:', selectedElement);
@@ -128,47 +121,6 @@ useEffect(() => {
 }, [socket, dispatch]);
 
 
-
-
-
-  useEffect(() => {
-
-    //socketRef.current = socket; // Ensure socketRef is initialized
-
-    if (socketRef.current) {
-      //socketRef.current.on('componentDropped', (componentData: any) => {
-      //  setCanvasComponents((prev) => [...prev, componentData]);
-      //});
-
-      //socketRef.current.on('componentDeleted', (componentId: string) => {
-      //  setCanvasComponents((prev) => prev.filter((comp) => comp.id !== componentId));
-      //});
-
-
-
-    }
-
-    return () => {
-      if (socketRef.current) {
-        //socketRef.current.off('componentDropped');
-        //socketRef.current.off('componentDeleted');
-
-      }
-    };
-}, [socketRef]);
-
-
-
-  const emitComponentDropped = (socket :any, roomId : any, state: any) => {
-    setTimeout(() => {
-      const updatedElements = JSON.stringify(state.editor.elements); // Replace with Redux `getState` if available
-
-      socket.emit('componentDropped', {
-        roomId,
-        updatedElements,
-      });
-    }, 0);
-  };
 
   
 const dispatchElement = (
@@ -353,6 +305,11 @@ const handleOnDrop = (e: React.DragEvent, type: string) => {
         elementDetails: element,
       },
     })
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
+    });
   }
 
   const handleDeleteElement = () => {
@@ -362,6 +319,17 @@ const handleOnDrop = (e: React.DragEvent, type: string) => {
         elementDetails: element,
       },
     })
+
+    
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+  
+      socket.emit('componentDeleted', {
+        roomId,
+        updatedElements,
+        deletedElement: element,  
+      });
+    }, 0);
     
   }
 

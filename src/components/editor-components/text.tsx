@@ -7,8 +7,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import {Props} from './types'
 import { useSocket } from '../../SocketContext';  
 import { useParams } from 'react-router-dom';
-
-
+import DOMPurify from 'dompurify';
 
 const TextComponent = (props: Props) => {
   const { dispatch, state } = useEditor();
@@ -54,39 +53,30 @@ const TextComponent = (props: Props) => {
 
   };
 
-  const handleUpdateText = (e: React.FocusEvent<HTMLSpanElement>) => {
-    const updatedText = e.target.innerText;
-    setTextContent(updatedText);
-
+  const handleUpdateText = (e: React.FormEvent<HTMLDivElement>) => {
+    const element = e.target as HTMLDivElement;
+    const sanitizedText = DOMPurify.sanitize(element.innerText);
+    
     dispatch({
       type: 'UPDATE_ELEMENT',
       payload: {
         elementDetails: {
           ...props.element,
-          texttitle: updatedText,
+          texttitle: sanitizedText,
         },
       },
     });
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      socket.emit('textUpdated',{roomId,elementId:props.element.id,updatedText,updatedElements});
+      socket.emit('textUpdated',{roomId,elementId:props.element.id,updatedText : sanitizedText,updatedElements});
     }, 0);
-
-    //socket.emit('textUpdated', { roomId, elementId: props.element.id, updatedcontent : updatedText });
-
   };
 
-  // Listen for real-time text updates
   useEffect(() => {
     const handleTextUpdate = ({ elementId, updatedText }: { elementId: string; updatedText: string }) => {
       if (elementId === props.element.id) {
-        console.log("Received update:", updatedText);
-        console.log("Received id:", elementId);
-
-        setTextContent(updatedText); 
-
-        /*dispatch({
+        dispatch({
           type: 'UPDATE_ELEMENT',
           payload: {
             elementDetails: {
@@ -94,12 +84,10 @@ const TextComponent = (props: Props) => {
               texttitle: updatedText,
             },
           },
-        });*/
+        });
       }
     };
-  
     socket.on('textUpdated', handleTextUpdate);
-  
     return () => {
       socket.off('textUpdated', handleTextUpdate);
     };
@@ -133,15 +121,20 @@ const TextComponent = (props: Props) => {
             {state.editor.selectedElement.name}
           </Badge>
         )}
-      <span
-        contentEditable={!state.editor.liveMode}
-        suppressContentEditableWarning={true}
-        //onBlur={handleUpdateText}
-        onInput={handleUpdateText}
-        onDrop={handleOnDrop}  
+
+      <div
+      contentEditable={!state.editor.liveMode}
+      suppressContentEditableWarning={true}
+      onInput={handleUpdateText}
+      onDrop={handleOnDrop} 
       >
-        {textContent}
-      </span>
+        <span
+        dangerouslySetInnerHTML={{
+        __html: DOMPurify.sanitize(props.element.texttitle || 'Text'),
+        }}
+        dir="ltr"
+        />
+      </div>
 
       {state.editor.selectedElement.id === props.element.id &&
         !state.editor.liveMode && (

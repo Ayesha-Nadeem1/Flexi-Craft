@@ -39,12 +39,13 @@ const LoadingComponent = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
   }
 
   const handleOnClickBody = (e: React.MouseEvent) => {
@@ -55,6 +56,12 @@ const LoadingComponent = (props: Props) => {
         elementDetails: props.element,
       },
     })
+
+    
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
   }
 
   const handleDeleteLoadingElement = (element: string) => {

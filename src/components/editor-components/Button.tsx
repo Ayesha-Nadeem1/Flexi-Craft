@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DOMPurify from 'dompurify';
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';  
@@ -14,6 +14,8 @@ const ButtonSection = (props: Props) => {
   const { dispatch, state } = useEditor();
   const  socket  = useSocket(); 
   const { roomId } = useParams();
+  const [buttonText, setButtonText] = useState<string>(props.element.buttontext || 'Button');
+
 
   const handleDeleteElement = () => {
     dispatch({
@@ -23,10 +25,11 @@ const ButtonSection = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-    
+  
       socket.emit('componentDeleted', {
         roomId,
         updatedElements,
+        deletedElement: props.element,  
       });
     }, 0);
   
@@ -41,11 +44,15 @@ const ButtonSection = (props: Props) => {
         elementDetails: props.element,
       },
     });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
   };
 
-  const handleUpdateContent = (e: React.FocusEvent<HTMLDivElement>) => {
+  const handleUpdateContent = (e: React.FormEvent<HTMLDivElement>) => {
     const divElement = e.target as HTMLDivElement;
-
     // Sanitize the input to prevent XSS attacks
     const sanitizedText = DOMPurify.sanitize(divElement.innerText);
 
@@ -58,7 +65,36 @@ const ButtonSection = (props: Props) => {
           },
       },
     });
+
+    setTimeout(() => {
+      const updatedElements = JSON.stringify(state.editor.elements);
+      socket.emit('textUpdated',{roomId,elementId:props.element.id,updatedText : sanitizedText,updatedElements});
+    }, 0);
+
   };
+
+  useEffect(() => {
+    const handleTextUpdate = ({ elementId, updatedText }: { elementId: string; updatedText: string }) => {
+
+      if (elementId === props.element.id) {
+        dispatch({
+          type: 'UPDATE_ELEMENT',
+          payload: {
+            elementDetails: {
+              ...props.element,
+                buttontext: updatedText,
+              },
+          },
+        });
+      }
+    };
+  
+    socket.on('textUpdated', handleTextUpdate);
+  
+    return () => {
+      socket.off('textUpdated', handleTextUpdate);
+    };
+  }, [socket, props.element.id, dispatch]);
 
   const styles = props.element.styles;
 
@@ -83,7 +119,8 @@ const ButtonSection = (props: Props) => {
 
       <div
         contentEditable={!state.editor.liveMode}
-        onBlur={handleUpdateContent}
+        //onBlur={handleUpdateContent}
+        onInput={handleUpdateContent}
         suppressContentEditableWarning={true}
         className="bg-transparent text-black py-2 px-4 rounded-md hover:bg-primary-dark"
         role="button"
@@ -92,6 +129,8 @@ const ButtonSection = (props: Props) => {
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(props.element.buttontext || 'Button'),
           }}
+          dir="ltr"  // Ensure text is left-to-right
+
         />
       </div>
 

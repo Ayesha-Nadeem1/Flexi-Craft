@@ -36,6 +36,14 @@ const Checkout = (props: Props) => {
         elementDetails: props.element,
       },
     })
+
+    
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
+
+
   }
 
   const handleDeleteElement = () => {
@@ -47,12 +55,13 @@ const Checkout = (props: Props) => {
     
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
   }
 
   return (

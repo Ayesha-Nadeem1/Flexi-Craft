@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge';
 import { EditorElement, useEditor } from '../../pages/editor-provider';
 import clsx from 'clsx';
 import { Trash } from 'lucide-react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import DOMPurify from 'dompurify';  // Import DOMPurify
 import { Props } from './types'; 
 import { useSocket } from '../../SocketContext';
@@ -21,6 +21,8 @@ const HeaderComponent = (props: Props) => {
   const socket = useSocket();
   const { roomId } = useParams();
 
+
+
   const handleDeleteElement = () => {
     dispatch({
       type: 'DELETE_ELEMENT',
@@ -29,12 +31,13 @@ const HeaderComponent = (props: Props) => {
 
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: props.element,  
       });
-      }, 0);
+    }, 0);
 
     };
 
@@ -46,11 +49,18 @@ const HeaderComponent = (props: Props) => {
         elementDetails: props.element,
       },
     });
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: props.element,
+    });
+
   };
 
   const handleUpdateContent = useCallback(
     (field: 'htitle' | 'htagline', e: React.FormEvent<HTMLHeadingElement | HTMLParagraphElement>) => {
-      const updatedContent = (e.target as HTMLElement).innerText;
+      const updatedContent = (e.target as HTMLElement).textContent;
+
       dispatch({
         type: 'UPDATE_ELEMENT',
         payload: {
@@ -60,9 +70,41 @@ const HeaderComponent = (props: Props) => {
           },
         },
       });
+
+      setTimeout(() => {
+        const updatedElements = JSON.stringify(state.editor.elements);
+        socket.emit('HeaderUpdated',{roomId,elementId:props.element.id,updatedText : updatedContent,field,updatedElements});
+      }, 0);
+
     },
+
     [dispatch, props.element]
   );
+
+    useEffect(() => {
+      const handleTextUpdate = ({ elementId, field ,updatedText }: { elementId: string; field:any, updatedText: string }) => {
+        
+        if (elementId === props.element.id) {
+          console.log("Received update:", updatedText);
+          console.log("Received id:", elementId);
+          console.log('field', field);
+
+          dispatch({
+            type: 'UPDATE_ELEMENT',
+            payload: {
+              elementDetails: {
+                ...props.element,
+                [field]: updatedText,  // Update htitle or htagline directly
+              },
+            },
+          });
+        }
+      };
+      socket.on('HeaderUpdated', handleTextUpdate);
+      return () => {
+        socket.off('HeaderUpdated', handleTextUpdate);
+      };
+    }, [socket, props.element.id, dispatch]);
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newColor = e.target.value;
@@ -95,20 +137,33 @@ const HeaderComponent = (props: Props) => {
         suppressContentEditableWarning={true}
         onInput={(e) => handleUpdateContent('htitle', e)}  // Update htitle
         className="text-4xl font-bold mb-2"
+      >
+        <span
         dangerouslySetInnerHTML={{
           __html: DOMPurify.sanitize(props.element.htitle || 'Website Title'), // Sanitize the input
         }}
-      />
+        dir="ltr"  
+        suppressContentEditableWarning={true}
+
+
+        />
+      </h1>
 
       <p
         contentEditable={!state.editor.liveMode}
         suppressContentEditableWarning={true}
         onInput={(e) => handleUpdateContent('htagline', e)}  // Update htagline
-        className="text-lg mb-4"
+        className="text-lg mb-4"   
+      >
+        <span
         dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(props.element.htagline || 'A brief tagline or description goes here.'), // Sanitize the input
+        __html: DOMPurify.sanitize(props.element.htagline || 'A brief tagline or description goes here.'), // Sanitize the input
         }}
-      />
+        dir="ltr"  
+        suppressContentEditableWarning={true}
+
+        />
+      </p>
 
       <nav className="flex gap-4">
         <a href="#home" className="hover:underline">Home</a>

@@ -40,12 +40,13 @@ const Navbar: React.FC<Props> = ({ element }) => {
     })
     setTimeout(() => {
       const updatedElements = JSON.stringify(state.editor.elements);
-      
+  
       socket.emit('componentDeleted', {
-      roomId,
-      updatedElements,
+        roomId,
+        updatedElements,
+        deletedElement: element,  
       });
-      }, 0);
+    }, 0);
       
   }
 
@@ -55,6 +56,11 @@ const Navbar: React.FC<Props> = ({ element }) => {
       type: 'CHANGE_CLICKED_ELEMENT',
       payload: { elementDetails: element },
     })
+
+    socket.emit('elementClicked', {
+      roomId,
+      selectedElement: element,
+    });
   }
 
   const handleColorChange = (colorType: 'text' | 'bg', color: string) => {
