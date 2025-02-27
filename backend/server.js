@@ -77,6 +77,11 @@ io.on('connection', (socket) => {
 
   });
 
+  socket.on('getstatus', ({roomId})=>{
+    socket.to(roomId).emit('getstatus', {roomId})
+  })
+  
+
   socket.on('elementClicked', ({ roomId, selectedElement }) => {
     socket.to(roomId).emit('syncState', { roomId, selectedElement });
     socket.to(roomId).emit('elementClicked', { roomId, selectedElement });
@@ -109,6 +114,11 @@ io.on('connection', (socket) => {
     });
  });
 
+  socket.on('templateselected',({roomId, selectedtemplate , apidata, updatedElements })=>{
+   socket.to(roomId).emit('syncState', { roomId, updatedElements });
+   socket.to(roomId).emit('templateselected', {selectedtemplate, apidata})
+ })
+
   socket.on('textUpdated', ({ roomId, elementId, updatedText, updatedElements }) => {
     socket.to(roomId).emit('syncState', { roomId, updatedElements });
     socket.to(roomId).emit('textUpdated', { elementId, updatedText });
@@ -118,7 +128,6 @@ io.on('connection', (socket) => {
     socket.to(roomId).emit('syncState', { roomId, updatedElements });
     socket.to(roomId).emit('stepsupdated', { elementId, steps, StepHeading });
   });
-
 
   socket.on('HeaderUpdated', ({ roomId, elementId, updatedText, field,updatedElements }) => {
     socket.to(roomId).emit('syncState', { roomId, updatedElements });

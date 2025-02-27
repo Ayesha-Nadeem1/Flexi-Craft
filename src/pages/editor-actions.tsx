@@ -93,6 +93,16 @@ export type EditorAction =
   
 
   {
+    type: 'GET_CURRENT_STATE'
+    payload: {
+      elements: EditorElement[]
+    }
+  }
+  |
+
+  
+
+  {
     type: 'LOAD_DATA_S'
     payload: {
       elements: EditorElement[]

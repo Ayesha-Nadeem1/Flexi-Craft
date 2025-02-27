@@ -93,6 +93,7 @@ const EditorPage: React.FC<{ element: EditorElement}> = ({ element }) => {
             ({ clients, username }: JoinedEventPayload) => {
                 if (username !== location.state?.username) {
                     toast.success(`${username} joined the room.`);
+                    socket.emit('getstatus', {roomId})
 
                 }
                 setClients(clients);

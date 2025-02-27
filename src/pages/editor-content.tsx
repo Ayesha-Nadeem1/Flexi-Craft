@@ -96,6 +96,27 @@ socket.off('connect_failed', handleErrors);
 };
 }, [socket, roomId, navigate]);
 
+useEffect(() => {
+  const handleSyncState = () => {
+    const currentState = state.editor.elements
+    console.log('cs ec')
+
+    dispatch({
+      type: 'LOAD_DATA_LS',
+      payload: { elements: currentState },
+    });
+  
+    socket.on('getstatus', handleSyncState);
+  };
+  
+  socket.on('getstatus', handleSyncState);
+  
+  // Cleanup the listener on unmount
+  return () => {
+  socket.off('getstatus', handleSyncState);
+  };
+  }, [socket, dispatch]);
+
 
 useEffect(() => {
     const handleComponentDropped = ({ roomId, componentData }: { roomId: string; componentData: any }) => {

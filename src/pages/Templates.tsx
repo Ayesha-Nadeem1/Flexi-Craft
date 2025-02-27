@@ -14,6 +14,8 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import {useSocket} from '../SocketContext'
+import { useParams } from 'react-router-dom';
 
 interface Template {
   id: string;
@@ -31,6 +33,9 @@ const TemplateBucketTab = () => {
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const socket = useSocket();
+  const { roomId } = useParams();
+  
 
   const fetchTemplates = async () => {
     try {
@@ -54,6 +59,24 @@ const TemplateBucketTab = () => {
   useEffect(() => {
     fetchTemplates();
   }, []);
+
+    useEffect(() => {
+      const handleTemplate = ({selectedtemplate, apidata}: { selectedtemplate : any, apidata : any }) => {
+        dispatch({
+          type: 'LOAD_DATA_TEMPLATE',
+          payload: { elements: selectedtemplate }
+        });
+        setSelectedTemplate({
+          id: apidata._id,
+          content: apidata.content,
+          name: apidata.name
+        });
+      };
+      socket.on('templateselected', handleTemplate);
+      return () => {
+        socket.off('templateselected', handleTemplate);
+      };
+    }, [socket, dispatch]);
 
   const handleOnSave = () => {
     setOpen(true);
@@ -110,6 +133,19 @@ const TemplateBucketTab = () => {
           content: data.content,
           name: data.name
         });
+
+        setTimeout(() => {
+          const updatedElements = JSON.stringify(state.editor.elements);
+      
+          socket.emit('templateselected', {
+            roomId,
+            selectedtemplate : content,
+            apidata : data,
+            updatedElements
+        });
+        }, 0);
+
+
       } else {
         throw new Error('Failed to fetch template');
       }

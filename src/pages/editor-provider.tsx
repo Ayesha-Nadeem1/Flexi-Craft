@@ -530,6 +530,11 @@ const editorReducer = (
           },
         }
 
+        case 'GET_CURRENT_STATE': {
+          console.log('Current state requested');
+          return state; // No modification needed, just logging.
+        }        
+
 
 
       case 'LOAD_DATA_S': {

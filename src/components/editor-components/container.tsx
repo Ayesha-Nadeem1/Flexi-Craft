@@ -24,6 +24,26 @@ const Container = ({ element }: Props) => {
 
 
 useEffect(() => {
+  const handleSyncState = () => {
+    console.log('cs cont')
+    const currentState = state.editor.elements
+    dispatch({
+      type: 'LOAD_DATA_LS',
+      payload: { elements: currentState },
+    });
+  
+    socket.on('getstatus', handleSyncState);
+  };
+  
+  socket.on('getstatus', handleSyncState);
+  
+  // Cleanup the listener on unmount
+  return () => {
+  socket.off('getstatus', handleSyncState);
+  };
+  }, [socket, dispatch]);
+
+useEffect(() => {
   const handleSyncState = ({ roomId, updatedElements }: { roomId: string; updatedElements: any }) => {
     console.log(`C Sync event received for Room ID: ${roomId}`, updatedElements);
     console.log("C Updated elements: ", updatedElements)
