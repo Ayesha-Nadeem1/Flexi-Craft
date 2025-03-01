@@ -21,6 +21,7 @@ function DragnDrop(elements){
   })
 }
 
+
 const basic_elements = [
   "svg.lucide-type",
   "svg.lucide-square-pen",
@@ -36,6 +37,7 @@ const landingpage_elements = [
   "svg.lucide-star",
   "svg.lucide-pen-tool",
   "svg.lucide-menu",
+  "svg.lucide-move3d",
   "svg.lucide-chef-hat",
   "svg.lucide-square-split-horizontal",
   "svg.lucide-text-select",
@@ -86,7 +88,7 @@ describe("Room Creation Testing", () => {
 
 });
 
-describe("Editor Drag & Drop Testing", () => {
+describe("Editor Drag & Drop & Component Editing Testing", () => {
     beforeEach(() => {;
         createRoom();
         cy.contains("CSS Styling").should("be.visible");
@@ -126,6 +128,200 @@ describe("Editor Drag & Drop Testing", () => {
       cy.contains('span', "A brief tagline or description goes here.").type("{selectall}{backspace}Test desc")
       cy.contains("Test title")
       cy.contains("Test desc")
+    })
+
+    it.skip("should test the editing of hero section", ()=>{
+      cy.get(landingpage_elements[1]).closest("div[draggable='true']").drag("div[draggable='false']")
+      cy.contains("span", "Your Main Heading Here").type("{selectall}{backspace}test heading")
+      cy.contains("span", "Your compelling subheading goes here.").type("{selectall}{backspace}test subheading")
+      cy.contains("test heading")
+      cy.contains("test subheading")
+    })
+
+    it.skip("should test the editing of values section", ()=>{
+      cy.get(landingpage_elements[2]).closest("div[draggable='true']").drag("div[draggable='false']")
+
+      const spantxts = [
+      'Your Value Proposition Title',
+      'A compelling description of the value you offer to your customers.',
+      'Core Value 1',
+      'Core Value 2',
+      'Core Value 3',
+      'Core Value 4',
+      'Description of core value.',
+      'Description of core value.',      
+      'Description of core value.',
+      'Description of core value.',
+      ]
+
+      spantxts.forEach((spantxt)=>{
+        cy.contains("span", spantxt).type("{selectall}{backspace}TEST")
+        cy.contains("TEST").should("be.visible");
+      })
+
+    })
+
+    it.skip("should test the editing of features section", ()=>{
+      cy.get(landingpage_elements[3]).closest("div[draggable='true']").drag("div[draggable='false']")
+
+      const spantxts = [
+      'Our Amazing Features',
+      'Discover the innovative features we offer.',
+      'Feature 1',
+      'Feature 2',
+      'Feature 3',
+      'Feature 4',
+      'Description of the feature.',
+      'Description of the feature.',      
+      'Description of the feature.',
+      'Description of the feature.',
+      ]
+
+      spantxts.forEach((spantxt)=>{
+        cy.contains("span", spantxt).type("{selectall}{backspace}FEATUREEDITTEST")
+        cy.contains("FEATUREEDITTEST").should("be.visible");
+      })
+
+    })
+
+    it.skip("should test the editing of footer section", ()=>{
+      cy.get(landingpage_elements[4]).closest("div[draggable='true']").drag("div[draggable='false']")
+
+      const spantxts = [
+      'Footer text goes here.',
+      'Your tagline or additional info.',
+      ]
+
+      spantxts.forEach((spantxt)=>{
+        cy.contains("span", spantxt).type("{selectall}{backspace}FOOTERTEST")
+        cy.contains("FOOTERTEST").should("be.visible");
+      })
+    })
+
+    it.skip("should test the editing of the dynamic text set", ()=>{
+      const options = ['Desert', 'Forest', 'Canyon', 'Glacier', 'Mountains', 'Ocean', 'Fries']
+      cy.get(landingpage_elements[8]).closest("div[draggable='true']").drag("div[draggable='false']")
+
+      options.forEach((option)=>{
+        cy.get("select").select(option)
+        cy.get("h1").first().type("{selectall}{backspace}TEST")
+        cy.contains("TEST").should("be.visible")
+      })
+
+    })
+
+    it.skip("should test the editing of the button set", ()=>{
+      const buttons = ['Button 1', 'Button 2', 'Button 3']
+      cy.get(landingpage_elements[10]).closest("div[draggable='true']").drag("div[draggable='false']")
+
+      buttons.forEach((button)=>{
+        cy.contains("div", button).type("{selectall}{backspace}BUTTON-TEST")
+        cy.contains("BUTTON-TEST").should("be.visible")
+      })
+
+    })
+
+    it.skip("should test the editing of the testimonial section", ()=>{
+      cy.get(landingpage_elements[11]).closest("div[draggable='true']").drag("div[draggable='false']")
+      const Texts = ['This is a fantastic service!', 'John Doe']
+
+      Texts.forEach((txt)=>{
+        cy.contains("span", txt).type("{selectall}{backspace}TEST")
+        cy.contains("TEST").should("be.visible")
+      })
+
+    })
+
+    it.skip("should test the editing of the grids and cards section", ()=>{
+      cy.get(advanced_elements[2]).closest("div[draggable='true']").drag("div[draggable='false']")
+
+      //cy.get('h3.text-xl.font-semibold').first().should('contain', 'Card 1').type('{selectall}{backspace}test');
+
+      cy.contains('div', 'Card 1').clear();
+      /*const Cards = ['Card 1', 'Card 2','Card 3']
+      const Cardstxts = ['This is the first card.', 'This is the second card.','This is the third card.']
+
+      Cards.forEach((txt) => {
+        cy.contains("div", txt).type("{selectall}{backspace}CARDTEST");
+        cy.contains("CARDTEST").should("be.visible");
+      });*/
+      
+
+      //Cardstxts.forEach((txt)=>{
+      //  cy.contains("p", txt).type("{selectall}{backspace}CARDDESCTEST")
+      //  cy.contains("CARDDESCTEST").should("be.visible")
+      //})
+
+    })
+
+    it.skip("should test the editing of the carousel section", ()=>{
+      cy.get(advanced_elements[3]).closest("div[draggable='true']").drag("div[draggable='false']")
+      const Texts = ['Image URL 1', 'Image URL 2', 'Image URL 3']
+
+      const imgurls = [
+      'https://images.unsplash.com/photo-1740680209886-c461a9c692f3?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      'https://images.unsplash.com/photo-1740312566180-5f96174fad47?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      'https://plus.unsplash.com/premium_photo-1732568817442-342a8c77fb80?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+      ]
+
+      Texts.forEach((txt, index) => {
+        cy.get(`input[placeholder="${txt}"]`).type(`{selectall}{backspace}${imgurls[index]}`);        
+      });
+
+      cy.get('input[value="Image Carousel"]').type("{selectall}{backspace}Carousel Test")
+
+      imgurls.forEach((imgurl)=>{
+        cy.get(`img[src="${imgurl}"]`).should("be.visible")
+        cy.contains("button", "Next").click()
+        cy.wait(800)
+      }) //flaky cuz of inconsistent img loading times
+    })
+
+    it.skip("should test the editing of the tabs and accordions section", ()=>{
+      cy.get(advanced_elements[5]).closest("div[draggable='true']").drag("div[draggable='false']")
+
+      const values= [ 'Tabs', 'Tab 1', 'Tab 2','Tab 3', 'Accordions',
+        'Accordion 1',
+        'Accordion 2',
+        'Accordion 3',
+
+      ]
+      values.forEach((value)=>{
+        cy.get(`input[value="${value}"]`).type("{selectall}{backspace}TA test")
+        cy.get("input[value='TA test']").should('be.visible');
+
+        if (value === 'Tab 1' || value === 'Tab 2' || value === 'Tab 3' || 
+          value === 'Accordion 1' || value === 'Accordion 2' || value === 'Accordion 3') 
+        {
+          cy.contains("textarea", "Content for").type("{selectall}{backspace}TA content test");
+        }
+
+      })  
+
+    })
+
+
+    it.skip("should test the editing of the steps section", ()=>{
+      cy.get(advanced_elements[6]).closest("div[draggable='true']").drag("div[draggable='false']")
+
+      const Steps= [ 'Steps', 'Step 1','Step 2','Step 3']
+      Steps.forEach((step)=>{
+        cy.get(`input[value="${step}"]`).type("{selectall}{backspace}Step test")
+        cy.get("input[value='Step test']").should('be.visible');
+
+      })  
+
+      const Stepdescs= [
+      'Description for Step 1',
+      'Description for Step 2',
+      'Description for Step 3',
+      ]
+
+      Stepdescs.forEach((val)=>{
+        cy.contains("textarea", val).type("{selectall}{backspace}Step content test");
+        cy.contains("Step content test").should("be.visible")
+      })
+
     })
 
 })
