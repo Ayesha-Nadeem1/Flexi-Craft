@@ -8,15 +8,94 @@ function createRoom(){
     cy.get("input[placeholder='ROOM ID']").invoke("val").should("not.be.empty")
     cy.get("input[placeholder='USERNAME']").type("Yahya")
     cy.contains("Join").click();
+    cy.wait(2000)
     cy.contains("Connected Clients")
     cy.contains("Yahya")
 }
 
-function DragnDrop(elements){
+function DragnDropnDel (elements){
   elements.forEach((element)=>{
     it("should drag and drop the element", ()=>{
       cy.get(element).closest('div[draggable="true"]').drag("div[draggable='false']")
       cy.get("div[draggable='false']").children().should("not.be.empty")
+      cy.get("div[draggable='false']").children().click({multiple : true, force : true})
+      cy.get("svg.lucide-trash").first().click({force : true});
+      cy.get("div[draggable='false']").children().should("not.be.visible");
+    })
+  })
+}
+
+function DragDropStyle (elements){
+  elements.forEach((element)=>{
+    it("should drag, drop and style the element", ()=>{
+      cy.get(element).closest('div[draggable="true"]').drag("div[draggable='false']")
+      cy.get("div[draggable='false']").children().should("not.be.empty")
+      cy.get("div[draggable='false']").children().click({multiple : true, force : true})
+      cy.get("div[draggable='false']").children().should("not.be.empty")
+      
+      //styling pipeline
+      cy.wait(500);
+      cy.get("svg.lucide-settings").click({force : true})
+      cy.wait(500);
+      cy.get("svg.lucide-align-center").click()
+      cy.wait(500);
+      cy.get("svg.lucide-chevron-down").eq(1).click()
+      cy.wait(500);
+      cy.contains("Verdana").click()
+      cy.wait(500);
+      cy.get("input[id='color']").type("{selectall}{backspace}BLUE") 
+      cy.wait(500);
+      cy.get("svg.lucide-chevron-down").eq(2).click()
+      cy.wait(500);
+      cy.contains("Bold").click()
+      cy.wait(500);
+      cy.get("input[id='fontSize']").type("25px")
+      cy.wait(500);
+      cy.get("input[id='height']").type("600px")
+      cy.wait(500);
+      cy.get("input[id='width']").type("500px")
+      cy.wait(500);
+      cy.get("input[id='marginTop']").type("100px")
+      cy.wait(500);
+      cy.get("input[id='marginBottom']").type("100px")
+      cy.wait(500);
+      cy.get("input[id='marginLeft']").type("100px")
+      cy.wait(500);
+      cy.get("input[id='marginRight']").type("100px")
+      cy.wait(500);
+      cy.get("input[id='paddingTop']").type("100px")
+      cy.wait(500);
+      cy.get("input[id='paddingBottom']").type("100px")
+      cy.wait(500);
+      cy.get("input[id='paddingLeft']").type("100px")
+      cy.wait(500);
+      cy.get("input[id='paddingRight']").type("100px")
+      cy.get('span[role="slider"]').first()
+      .focus()
+      .trigger('keydown', { key: 'ArrowLeft', shiftKey : true }) 
+      .trigger('keydown', { key: 'ArrowLeft', shiftKey : true }) 
+      .trigger('keydown', { key: 'ArrowLeft', shiftKey : true }) 
+      .trigger('keydown', { key: 'ArrowLeft', shiftKey : true }) 
+      cy.get('span[role="slider"]').eq(1)
+      .focus()
+      .trigger('keydown', { key: 'ArrowRight', shiftKey : true }) 
+      .trigger('keydown', { key: 'ArrowRight', shiftKey : true }) 
+      cy.wait(500);
+      cy.get("input[id='backgroundColor']").type("#d11b1b")
+      cy.wait(500);
+      cy.get("input[id='backgroundImage']").type("url(https://images.unsplash.com/photo-1735322122784-859d1445023d?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)")
+      cy.wait(500);
+      cy.get("svg.lucide-align-vertical-justify-center").first().click()
+      cy.wait(500);
+      cy.get("svg.lucide-align-horizontal-justify-center").click()
+      cy.wait(500);
+      cy.get("svg.lucide-align-vertical-justify-start").click()
+      cy.wait(500);
+      cy.get("input[id='flexDirection']").type("60px")
+      cy.wait(500);
+
+      
+      
     })
   })
 }
@@ -88,18 +167,19 @@ describe("Room Creation Testing", () => {
 
 });
 
-describe("Editor Drag & Drop & Component Editing Testing", () => {
-    beforeEach(() => {;
+describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
+    beforeEach(() => {
         createRoom();
-        cy.contains("CSS Styling").should("be.visible");
+        cy.contains("CSS Styling").should("exist").and("be.visible");
         cy.get("#radix-\\:ra\\:-trigger-Components").click();
         cy.contains("button", "Landing Page Elements").click();
         cy.contains("button", "Advanced Elements").click();
     });
 
-    //DragnDrop(basic_elements)
-    //DragnDrop(landingpage_elements)  //commented because of long testing times
-    //DragnDrop(advanced_elements)
+    //DragnDropnDel(basic_elements) 
+    //DragnDropnDel(landingpage_elements)   
+    //DragnDropnDel(advanced_elements)
+
 
     it.skip("should test the editing of text element", ()=>{
       cy.get(basic_elements[0]).closest('div[draggable="true"]').drag("div[draggable='false']")
@@ -232,27 +312,6 @@ describe("Editor Drag & Drop & Component Editing Testing", () => {
 
     })
 
-    it.skip("should test the editing of the grids and cards section", ()=>{
-      cy.get(advanced_elements[2]).closest("div[draggable='true']").drag("div[draggable='false']")
-
-      //cy.get('h3.text-xl.font-semibold').first().should('contain', 'Card 1').type('{selectall}{backspace}test');
-
-      cy.contains('div', 'Card 1').clear();
-      /*const Cards = ['Card 1', 'Card 2','Card 3']
-      const Cardstxts = ['This is the first card.', 'This is the second card.','This is the third card.']
-
-      Cards.forEach((txt) => {
-        cy.contains("div", txt).type("{selectall}{backspace}CARDTEST");
-        cy.contains("CARDTEST").should("be.visible");
-      });*/
-      
-
-      //Cardstxts.forEach((txt)=>{
-      //  cy.contains("p", txt).type("{selectall}{backspace}CARDDESCTEST")
-      //  cy.contains("CARDDESCTEST").should("be.visible")
-      //})
-
-    })
 
     it.skip("should test the editing of the carousel section", ()=>{
       cy.get(advanced_elements[3]).closest("div[draggable='true']").drag("div[draggable='false']")
@@ -323,8 +382,51 @@ describe("Editor Drag & Drop & Component Editing Testing", () => {
       })
 
     })
+    
+    it.skip("should test the editing of the grids and cards section", ()=>{
+      cy.get(advanced_elements[2]).closest("div[draggable='true']").drag("div[draggable='false']")
+      cy.contains("section", "Card").click();
+
+      const Cards = ['Card 1', 'Card 2','Card 3']
+      const Cardstxts = ['This is the first card.', 'This is the second card.','This is the third card.']
+
+      Cards.forEach((txt) => {
+        cy.get(`input[value="${txt}"]`).type("{selectall}{backspace}CARDTEST");
+        cy.get("input[value='CARDTEST']").should("be.visible")
+      });
+      
+      Cardstxts.forEach((txt)=>{
+        cy.contains("textarea", txt).type("{selectall}{backspace}CARDDESCTEST")
+        cy.contains("CARDDESCTEST").should("be.visible")
+      })
+
+      const imgurls = ["Enter image URL", 'Enter image URL', "Enter image URL"]
+      imgurls.forEach((url, index)=>{
+        cy.get(`input[placeholder="${url}"]`).eq(index).type("{selectall}{backspace}https://plus.unsplash.com/premium_photo-1671732135769-f4051b8a08f0?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", {force: true})
+      })
+
+      cy.get("img[src='https://plus.unsplash.com/premium_photo-1671732135769-f4051b8a08f0?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D']")
+      .should("be.visible")
+    })
 
 })
+
+describe("Editor Component Styling Tests", ()=>{
+  beforeEach(() => {
+    createRoom();
+    cy.contains("CSS Styling").should("exist").and("be.visible");
+    cy.get("#radix-\\:ra\\:-trigger-Components").click();
+    cy.contains("button", "Landing Page Elements").click();
+    cy.contains("button", "Advanced Elements").click();
+});
+
+  DragDropStyle(basic_elements)
+  //DragDropStyle(landingpage_elements)
+  //DragDropStyle(advanced_elements)
+
+})
+
+
 
 
     
