@@ -8,7 +8,18 @@ export type EditorAction =
         elementDetails: EditorElement
       }
     }
-  | {
+  | 
+
+   {
+    type: 'ADDMODEL_ELEMENT'
+    payload: {
+      containerId: string
+      elementDetails: any
+    }
+  }
+|
+
+  {
       type: 'UPDATE_ELEMENT'
       payload: {
         elementDetails: EditorElement
@@ -71,6 +82,14 @@ export type EditorAction =
       elements: EditorElement[]
     }
   }
+  |
+
+  {
+      type: 'LOAD_MODEL_DATA'
+      payload: {
+        elements: any
+      }
+    }
   |
 
   

@@ -35,7 +35,7 @@ import { exportToCheckoutCode } from '../components/editor-components/checkout'
 import { exportToButtonSetCode } from '../components/editor-components/buttonset'
 import { exportToAnimationSetCode } from '../components/editor-components/animations'
 import { useSocket } from '../SocketContext'; // Import the useSocket hook
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 
@@ -59,6 +59,9 @@ COMPONENT_DELETED: 'componentDeleted',
 };
 
 
+
+
+
 const { id, content, name, styles, type } = element|| {};
 const { dispatch, state } = useEditor()
 const navigate = useNavigate();
@@ -72,7 +75,6 @@ onLiveModeChange(livemode);
 const toggleLiveMode = () => {
 setLiveMode((prev) => !prev);
 };
-
 
 
 useEffect(() => {
@@ -326,7 +328,6 @@ zip.generateAsync({ type: 'blob' }).then((content) => {
 saveAs(content, 'React-components.zip');
 });
 };
-
 
 
 // Adjust the generateBodyCode function to handle only the elements needed

@@ -37,6 +37,9 @@ const EditorPage: React.FC<{ element: EditorElement}> = ({ element }) => {
         //SYNC_STATE_RESPONSE: 'syncStateResponse',
     };
 
+
+
+
     const navigate = useNavigate();
     const location = useLocation();
     const { username } = location.state || {};
@@ -45,10 +48,15 @@ const EditorPage: React.FC<{ element: EditorElement}> = ({ element }) => {
     const socket = useSocket(); // Use socket from context
     const { state, dispatch } = useEditor()
     const [livemode, setLiveMode] = useState(false); // Track liveMode in EditorPage
+    //const { modeloutput = "" } = location.state || {}; // Default to empty if state is missing
+    //const [code, setCode] = useState(modeloutput);
+
 
     const handleLiveModeChange = (newLiveMode: boolean) => {
         setLiveMode(newLiveMode); // Update liveMode state when it changes in EditorContent
     };
+
+
 
     useEffect(() => {
         const init = async () => {

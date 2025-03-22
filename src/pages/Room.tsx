@@ -36,6 +36,10 @@ const Home: React.FC = () => {
         });
     };
 
+    const jointpp = () =>{
+        navigate(`/textprompt`);
+    }
+
     const handleRoomIdPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
         const pastedText = e.clipboardData.getData('text');
         setRoomId(pastedText.trim());
@@ -49,11 +53,11 @@ const Home: React.FC = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
+        <div className="flex items-center justify-center min-h-screen bg-gray-800">
+            <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-sm">
                 <FaEdit className="mx-auto text-blue-500" size={64} />
-                <h1 className="text-3xl font-semibold text-center text-gray-800 mt-4">Editor</h1>
-                <h4 className="text-lg text-center text-gray-600 mt-2">Paste invitation ROOM ID</h4>
+                <h1 className="text-3xl font-semibold text-center text-blue-500 mt-4">Editor</h1>
+                <h4 className="text-lg text-center text-blue-500 mt-2">Paste invitation ROOM ID</h4>
                 <div className="mt-6 space-y-4">
                     <input
                         type="text"
@@ -79,7 +83,15 @@ const Home: React.FC = () => {
                     >
                         Join
                     </button>
-                    <span className="block text-center text-gray-600">
+
+                    <button
+                        className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onClick={jointpp}
+                    >
+                        Goto TextPrompt Page
+                    </button>
+
+                    <span className="block text-center text-white">
                         If you don't have an invite, create &nbsp;
                         <a
                             onClick={createNewRoom}

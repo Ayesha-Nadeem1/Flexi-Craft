@@ -5,7 +5,6 @@ const http = require('http');
 const { Server } = require('socket.io');
 
 
-
 const ACTIONS = {
   JOIN: "join",
   JOINED: "joined",
@@ -191,8 +190,6 @@ io.on('connection', (socket) => {
 });
 
 
-
-
 });
 
 server.listen(5000, () => {
@@ -201,4 +198,3 @@ server.listen(5000, () => {
 
 
 
-//leave n rejoin r finicky rn will fix later 

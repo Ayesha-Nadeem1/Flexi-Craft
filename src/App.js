@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Editor from './pages/Home';
 import Room from './pages/Room';
+import TPP from './pages/promptpage'
 
 function App() {
     return (
@@ -22,6 +23,7 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/" element={<Room />}></Route>
+                    <Route path="/textprompt" element={<TPP />}></Route>
                     <Route
                         path="/editor/:roomId"
                         element={<Editor />}

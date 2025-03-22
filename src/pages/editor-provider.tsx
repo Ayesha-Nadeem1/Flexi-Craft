@@ -180,6 +180,7 @@ const addAnElement = (
   editorArray: EditorElement[],
   action: EditorAction
 ): EditorElement[] => {
+
   if (action.type !== 'ADD_ELEMENT')
     throw Error(
       'You sent the wrong action type to the Add Element editor State'
@@ -271,6 +272,7 @@ const editorReducer = (
   action: EditorAction
 ): EditorState => {
   switch (action.type) {
+    
     case 'ADD_ELEMENT':
       const updatedEditorState = {
         ...state.editor,
@@ -518,6 +520,16 @@ const editorReducer = (
             },
           };
         }
+
+
+        case 'LOAD_MODEL_DATA':
+          return {
+            ...initialState,
+            editor: {
+              ...initialState.editor,
+              elements: action.payload.elements || initialEditorState.elements,
+            },
+          }
         
       
     

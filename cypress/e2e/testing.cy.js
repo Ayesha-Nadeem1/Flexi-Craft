@@ -1,4 +1,3 @@
-const { create } = require("domain");
 import 'cypress-promise/register'
 
 
@@ -140,7 +139,7 @@ const advanced_elements= [
 
 describe("Room Creation Testing", () => {
 
-    it.skip("Room page loading test", () => { 
+    it("Room page loading test", () => { 
       cy.visit("/"); 
       cy.contains("Editor").should("be.visible");
       cy.get("input[placeholder='ROOM ID']").should("be.visible")
@@ -149,18 +148,18 @@ describe("Room Creation Testing", () => {
       cy.contains('new room').should("be.visible")
     });
 
-    it.skip("should create room", ()=>{ 
+    it("should create room", ()=>{ 
         createRoom();
 
     });
 
-    it.skip("should validate the room creation input fields", ()=>{ 
+    it("should validate the room creation input fields", ()=>{ 
         cy.visit('/')
         cy.contains("Join").click();
         cy.contains("ROOM ID & username are required")
     })
 
-    it.skip("should load the editor", ()=>{ 
+    it("should load the editor", ()=>{ 
         createRoom()
         cy.contains("CSS Styling").should("be.visible")
     })
@@ -176,24 +175,24 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
         cy.contains("button", "Advanced Elements").click();
     });
 
-    //DragnDropnDel(basic_elements) 
-    //DragnDropnDel(landingpage_elements)   
-    //DragnDropnDel(advanced_elements)
+    DragnDropnDel(basic_elements) 
+    DragnDropnDel(landingpage_elements)   
+    DragnDropnDel(advanced_elements)
 
 
-    it.skip("should test the editing of text element", ()=>{
+    it  ("should test the editing of text element", ()=>{
       cy.get(basic_elements[0]).closest('div[draggable="true"]').drag("div[draggable='false']")
       cy.contains("Text").type('{selectall}{backspace}test')
       cy.contains('test')
     })
 
-    it.skip("should test the editing of button element", ()=>{
+    it  ("should test the editing of button element", ()=>{
       cy.get(basic_elements[2]).closest('div[draggable="true"]').drag("div[draggable='false']")
       cy.contains("section", "Button").type("{selectall}{backspace}testbutton")
       cy.contains('testbutton')
     })
 
-    it.skip("should test the editing of media element", ()=>{
+    it  ("should test the editing of media element", ()=>{
       cy.get(basic_elements[3]).closest('div[draggable="true"]').drag("div[draggable='false']")
       const media = "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzh4MjRneGx1NHpveDZpejF6M2t3c2duZ2NwcG51OTZxMGNhb2dhNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/VIKa3CjZDCoymNcBY5/giphy.gif"
       cy.get('input[placeholder="Enter media URL"]').type(media)
@@ -201,7 +200,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
       cy.get("img").should("be.visible")
     })
 
-    it.skip("should test the editing of header element", ()=>{
+    it  ("should test the editing of header element", ()=>{
       cy.get(landingpage_elements[0]).closest('div[draggable="true"]').drag("div[draggable='false']")
       cy.get('header').should('be.visible')
       cy.contains('span', "Website Title").type("{selectall}{backspace}Test title")
@@ -210,7 +209,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
       cy.contains("Test desc")
     })
 
-    it.skip("should test the editing of hero section", ()=>{
+    it("should test the editing of hero section", ()=>{
       cy.get(landingpage_elements[1]).closest("div[draggable='true']").drag("div[draggable='false']")
       cy.contains("span", "Your Main Heading Here").type("{selectall}{backspace}test heading")
       cy.contains("span", "Your compelling subheading goes here.").type("{selectall}{backspace}test subheading")
@@ -218,7 +217,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
       cy.contains("test subheading")
     })
 
-    it.skip("should test the editing of values section", ()=>{
+    it("should test the editing of values section", ()=>{
       cy.get(landingpage_elements[2]).closest("div[draggable='true']").drag("div[draggable='false']")
 
       const spantxts = [
@@ -241,7 +240,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
 
     })
 
-    it.skip("should test the editing of features section", ()=>{
+    it("should test the editing of features section", ()=>{
       cy.get(landingpage_elements[3]).closest("div[draggable='true']").drag("div[draggable='false']")
 
       const spantxts = [
@@ -264,7 +263,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
 
     })
 
-    it.skip("should test the editing of footer section", ()=>{
+    it("should test the editing of footer section", ()=>{
       cy.get(landingpage_elements[4]).closest("div[draggable='true']").drag("div[draggable='false']")
 
       const spantxts = [
@@ -278,7 +277,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
       })
     })
 
-    it.skip("should test the editing of the dynamic text set", ()=>{
+    it("should test the editing of the dynamic text set", ()=>{
       const options = ['Desert', 'Forest', 'Canyon', 'Glacier', 'Mountains', 'Ocean', 'Fries']
       cy.get(landingpage_elements[8]).closest("div[draggable='true']").drag("div[draggable='false']")
 
@@ -290,7 +289,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
 
     })
 
-    it.skip("should test the editing of the button set", ()=>{
+    it("should test the editing of the button set", ()=>{
       const buttons = ['Button 1', 'Button 2', 'Button 3']
       cy.get(landingpage_elements[10]).closest("div[draggable='true']").drag("div[draggable='false']")
 
@@ -301,7 +300,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
 
     })
 
-    it.skip("should test the editing of the testimonial section", ()=>{
+    it("should test the editing of the testimonial section", ()=>{
       cy.get(landingpage_elements[11]).closest("div[draggable='true']").drag("div[draggable='false']")
       const Texts = ['This is a fantastic service!', 'John Doe']
 
@@ -313,7 +312,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
     })
 
 
-    it.skip("should test the editing of the carousel section", ()=>{
+    it("should test the editing of the carousel section", ()=>{
       cy.get(advanced_elements[3]).closest("div[draggable='true']").drag("div[draggable='false']")
       const Texts = ['Image URL 1', 'Image URL 2', 'Image URL 3']
 
@@ -336,7 +335,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
       }) //flaky cuz of inconsistent img loading times
     })
 
-    it.skip("should test the editing of the tabs and accordions section", ()=>{
+    it("should test the editing of the tabs and accordions section", ()=>{
       cy.get(advanced_elements[5]).closest("div[draggable='true']").drag("div[draggable='false']")
 
       const values= [ 'Tabs', 'Tab 1', 'Tab 2','Tab 3', 'Accordions',
@@ -360,7 +359,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
     })
 
 
-    it.skip("should test the editing of the steps section", ()=>{
+    it("should test the editing of the steps section", ()=>{
       cy.get(advanced_elements[6]).closest("div[draggable='true']").drag("div[draggable='false']")
 
       const Steps= [ 'Steps', 'Step 1','Step 2','Step 3']
@@ -383,7 +382,7 @@ describe("Editor Drag, Drop, Removal & Component Editing Testing", () => {
 
     })
     
-    it.skip("should test the editing of the grids and cards section", ()=>{
+    it("should test the editing of the grids and cards section", ()=>{
       cy.get(advanced_elements[2]).closest("div[draggable='true']").drag("div[draggable='false']")
       cy.contains("section", "Card").click();
 
@@ -421,12 +420,10 @@ describe("Editor Component Styling Tests", ()=>{
 });
 
   DragDropStyle(basic_elements)
-  //DragDropStyle(landingpage_elements)
-  //DragDropStyle(advanced_elements)
+  DragDropStyle(landingpage_elements)
+  DragDropStyle(advanced_elements)
 
 })
-
-
 
 
     
