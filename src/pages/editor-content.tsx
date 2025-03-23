@@ -38,29 +38,20 @@ import { useSocket } from '../SocketContext'; // Import the useSocket hook
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-
-
 type Props = {
 liveMode?: boolean;
 roomId: string;
 element: EditorElement
 onLiveModeChange: (liveMode: boolean) => void; // Callback to notify parent
-
-
 };
 
 const EditorContent = ({ liveMode, element, onLiveModeChange }: Props) => {
 const socket = useSocket(); // Get socket instance from context
 
-
 const ACTIONS = {
 COMPONENT_DROPPED: 'componentDropped',
 COMPONENT_DELETED: 'componentDeleted',
 };
-
-
-
-
 
 const { id, content, name, styles, type } = element|| {};
 const { dispatch, state } = useEditor()
@@ -75,7 +66,6 @@ onLiveModeChange(livemode);
 const toggleLiveMode = () => {
 setLiveMode((prev) => !prev);
 };
-
 
 useEffect(() => {
 if (!socket) {
