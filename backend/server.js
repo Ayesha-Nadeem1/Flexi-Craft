@@ -113,6 +113,10 @@ io.on('connection', (socket) => {
     });
  });
 
+ socket.on("Newcontent", ({newContent, roomId})=>{
+  socket.to(roomId).emit("Newcontent", {newContent, roomId})
+ })
+
   socket.on('templateselected',({roomId, selectedtemplate , apidata, updatedElements })=>{
    socket.to(roomId).emit('syncState', { roomId, updatedElements });
    socket.to(roomId).emit('templateselected', {selectedtemplate, apidata})

@@ -33,7 +33,6 @@ interface DisconnectedEventPayload {
 //get the text prompt from the promptpage
 //use that to call the ai model api here
 //render the response code
-//download the response code after it loads properly
 //for now we're using the sample model output code for rendering
 
 //P.S only render the sample output when user chooses to enter text prompt 
@@ -49,7 +48,7 @@ const EditorPage: React.FC<{ element: EditorElement}> = ({ element }) => {
         //SYNC_STATE_RESPONSE: 'syncStateResponse',
     };
 
-const [sampleoutput, setSampleoutput] = useState(`<!DOCTYPE html>
+    const [sampleoutput, setSampleoutput] = useState(`<!DOCTYPE html>
     <html>
     <head>
       <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -154,7 +153,70 @@ const [sampleoutput, setSampleoutput] = useState(`<!DOCTYPE html>
 
     const [images, setImages] = useState<string[]>([]);
     const editorRef = useRef<HTMLDivElement | null>(null);
+    const ecRef = useRef<HTMLDivElement>(null);
+    
 
+    const [showSampleOutput, setShowSampleOutput] = useState(false); // Toggle state
+
+    const toggleSampleOutput = () => {
+      if (!sampleoutput.trim()) {
+        alert("You have not generated model output yet");
+        return;
+    }
+        setShowSampleOutput((prev) => !prev);
+    };
+
+
+    const openJoinedPreview = () => {
+      if (!sampleoutput.trim() && !state.editor.elements) {
+          alert("Both sample output and editor content are empty!");
+          return;
+      }
+  
+      const combinedContent = `
+      <div 
+          style="
+              padding: 10px; 
+              border-radius: 5px; 
+              font-size: ${styles.fontSize}; 
+              background-color: ${styles.backgroundColor}; 
+              color: ${styles.color}; 
+              padding: ${styles.padding}; 
+              border-radius: ${styles.borderRadius};
+              max-height: 90vh;
+              overflow: auto;
+              border: 1px solid #ddd;
+              margin-bottom: 20px;
+          "
+      >
+          ${content}
+      </div>
+      <hr />
+      <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+          <pre style="white-space: pre-wrap; word-wrap: break-word;">${ecRef.current?.innerHTML}</pre>
+      </div>
+  `;
+        const newTab = window.open();
+      
+      if (newTab) {
+          newTab.document.write(`
+              <html>
+              <head>
+                  <title>Joined Preview</title>
+                  <style>
+                      body { font-family: Arial, sans-serif; padding: 20px; }
+                      pre { white-space: pre-wrap; word-wrap: break-word; background: #f4f4f4; padding: 10px; border-radius: 5px; }
+                      hr { margin: 20px 0; border: 1px solid #ccc; }
+                  </style>
+              </head>
+              <body>${combinedContent}</body>
+              </html>
+          `);
+          newTab.document.close();
+      } else {
+          alert("Popup blocked! Please allow popups for this site.");
+      }
+  };
     
     useEffect(() => {
         // Parse the incoming modelResponse and extract image sources dynamically
@@ -185,6 +247,21 @@ const [sampleoutput, setSampleoutput] = useState(`<!DOCTYPE html>
     const handleLiveModeChange = (newLiveMode: boolean) => {
         setLiveMode(newLiveMode); // Update liveMode state when it changes in EditorContent
     };
+
+    useEffect(() => {
+      const handleTextUpdate = ({ newContent , roomId}: {newContent : string, roomId : string }) => {
+        if(editorRef.current){
+          console.log("Frontend received:", newContent, "Room ID:", roomId);
+          editorRef.current.innerHTML = newContent; // Update editor content
+          setContent(newContent);
+          localStorage.setItem("editorContent", newContent);
+        }
+      };
+      socket.on('Newcontent', handleTextUpdate);
+      return () => {
+        socket.off('Newcontent', handleTextUpdate);
+      };
+    }, [socket]);
 
 
 
@@ -288,8 +365,6 @@ const [sampleoutput, setSampleoutput] = useState(`<!DOCTYPE html>
     };
 
 
-    //saving, css , rt
-
     const [content, setContent] = useState<string>(() => {
         return localStorage.getItem("editormContent") || "<p>Sample Output Content</p>";
     });
@@ -314,7 +389,11 @@ const [sampleoutput, setSampleoutput] = useState(`<!DOCTYPE html>
             const newContent = editorRef.current.innerHTML;
             setContent(newContent);
             localStorage.setItem("editormContent", newContent);
+            socket.emit("Newcontent", {newContent, roomId})
+
         }
+
+
     };
 
     // Save styles to localStorage on change
@@ -371,10 +450,6 @@ const [sampleoutput, setSampleoutput] = useState(`<!DOCTYPE html>
         reader.readAsText(file);
     };
     
-    
-
-
-
     return (
         <div className="fixed top-0 bottom-0 left-0 right-0 z-[20] bg-background overflow-hidden">
             <EditorProvider>
@@ -389,79 +464,101 @@ const [sampleoutput, setSampleoutput] = useState(`<!DOCTYPE html>
                         />
                     )}
 
+                      <div>
+                      <button 
+                          onClick={toggleSampleOutput} 
+                          className="absolute top-8 right-80 bg-blue-500 text-white px-4 py-2 rounded-md"
+                      >
+                          {showSampleOutput ? "Hide Model Output" : "Show Model Output"}
+                      </button>
+                      <button 
+                      className='absolute top-8 right-100 bg-blue-500 text-white px-4 py-2 rounded-md'
+                      onClick={openJoinedPreview}>Joined Preview</button>
 
-                    <div className="mt-4">
-                        <h3>Edit Image URLs:</h3>
-                        {images.map((src, index) => (
-                            <div key={index} className="mb-2">
+                      </div>
+
+                    {showSampleOutput && (
+                    <>
+                    <div className="mt-4 p-4 border rounded-lg bg-gray-100 shadow-md w-64">
+                        {/* Image URL Editing */}
+                        <h3 className="text-lg font-semibold mb-2">Edit Image URLs</h3>
+                        <div className="space-y-2">
+                            {images.map((src, index) => (
                                 <input
+                                    key={index}
                                     type="text"
                                     value={src}
                                     onChange={(e) => handleImageUpdate(index, e.target.value)}
-                                    className="border p-1 w-full"
+                                    className="border rounded-md p-2 w-full text-sm"
+                                    placeholder={`Image URL ${index + 1}`}
                                 />
-                            </div>
-                        ))}
-
-<h3 className="font-bold mb-2">Edit Styles:</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium">Font Size</label>
-                        <input
-                            type="text"
-                            value={styles.fontSize}
-                            onChange={(e) => handleStyleChange("fontSize", e.target.value)}
-                            className="border p-1 w-full"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Background Color</label>
-                        <input
-                            type="color"
-                            value={styles.backgroundColor}
-                            onChange={(e) => handleStyleChange("backgroundColor", e.target.value)}
-                            className="border p-1 w-full"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Text Color</label>
-                        <input
-                            type="color"
-                            value={styles.color}
-                            onChange={(e) => handleStyleChange("color", e.target.value)}
-                            className="border p-1 w-full"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Padding</label>
-                        <input
-                            type="text"
-                            value={styles.padding}
-                            onChange={(e) => handleStyleChange("padding", e.target.value)}
-                            className="border p-1 w-full"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Border Radius</label>
-                        <input
-                            type="text"
-                            value={styles.borderRadius}
-                            onChange={(e) => handleStyleChange("borderRadius", e.target.value)}
-                            className="border p-1 w-full"
-                        />
-                    </div>
-
-                    
-                        <div>
-                    <button onClick={exportOutputState}>Export Output</button>
-                    <input type="file" accept="application/json" onChange={importOutputState} />
+                            ))}
                         </div>
 
-                </div>
+                        {/* Style Editing */}
+                        <h3 className="text-lg font-semibold mt-4 mb-2">Edit Styles</h3>
+                        <div className="space-y-3">
+                            <div>
+                                <label className="block text-xs font-medium">Font Size</label>
+                                <input
+                                    type="text"
+                                    value={styles.fontSize}
+                                    onChange={(e) => handleStyleChange("fontSize", e.target.value)}
+                                    className="border rounded-md p-2 w-full text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium">Background Color</label>
+                                <input
+                                    type="color"
+                                    value={styles.backgroundColor}
+                                    onChange={(e) => handleStyleChange("backgroundColor", e.target.value)}
+                                    className="w-full h-8 cursor-pointer border rounded-md"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium">Text Color</label>
+                                <input
+                                    type="color"
+                                    value={styles.color}
+                                    onChange={(e) => handleStyleChange("color", e.target.value)}
+                                    className="w-full h-8 cursor-pointer border rounded-md"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium">Padding</label>
+                                <input
+                                    type="text"
+                                    value={styles.padding}
+                                    onChange={(e) => handleStyleChange("padding", e.target.value)}
+                                    className="border rounded-md p-2 w-full text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium">Border Radius</label>
+                                <input
+                                    type="text"
+                                    value={styles.borderRadius}
+                                    onChange={(e) => handleStyleChange("borderRadius", e.target.value)}
+                                    className="border rounded-md p-2 w-full text-sm"
+                                />
+                            </div>
+                        </div>
 
-
+                        {/* Export & Import */}
+                        <div className="mt-4 space-y-2">
+                            <button
+                                onClick={exportOutputState}
+                                className="w-full bg-blue-600 text-white text-sm font-medium p-2 rounded-md hover:bg-blue-700 transition"
+                            >
+                                Export Output
+                            </button>
+                            <label className="w-full block text-sm text-center bg-gray-200 p-2 rounded-md cursor-pointer hover:bg-gray-300 transition">
+                                Import Output
+                                <input type="file" accept="application/json" onChange={importOutputState} className="hidden" />
+                            </label>
+                        </div>
                     </div>
-
 
                     <div 
                         className="sample-output border p-4 bg-white overflow-auto" 
@@ -477,9 +574,11 @@ const [sampleoutput, setSampleoutput] = useState(`<!DOCTYPE html>
                         ref={editorRef}
                         dangerouslySetInnerHTML={{ __html: sampleoutput }}
                         onInput={handleContentChange}
-
                     >
                     </div>
+                    </>
+
+                    )}
 
                     {roomId && (
                         <EditorContent
@@ -487,7 +586,7 @@ const [sampleoutput, setSampleoutput] = useState(`<!DOCTYPE html>
                             roomId={roomId}
                             element={element}
                             onLiveModeChange={handleLiveModeChange}
-
+                            ref = {ecRef}
                         />
                     )}
                 </div>

@@ -3,7 +3,7 @@
 import { Button } from '../components/ui/button'
 import clsx from 'clsx'
 import { EyeOff, ListCollapseIcon, CodeIcon } from 'lucide-react'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState,forwardRef, useImperativeHandle, useRef } from 'react'
 import Component_distributor from '../components/editor-components/component_distributor'
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver'
@@ -38,6 +38,7 @@ import { useSocket } from '../SocketContext'; // Import the useSocket hook
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
+
 type Props = {
 liveMode?: boolean;
 roomId: string;
@@ -45,8 +46,12 @@ element: EditorElement
 onLiveModeChange: (liveMode: boolean) => void; // Callback to notify parent
 };
 
-const EditorContent = ({ liveMode, element, onLiveModeChange }: Props) => {
+const EditorContent = forwardRef<HTMLDivElement, Props>(({ liveMode, element, onLiveModeChange }, ref) => {
+
 const socket = useSocket(); // Get socket instance from context
+const localRef = useRef<HTMLDivElement | null>(null)
+// Expose the local ref to the parent component
+useImperativeHandle(ref, () => localRef.current!);
 
 const ACTIONS = {
 COMPONENT_DROPPED: 'componentDropped',
@@ -58,6 +63,7 @@ const { dispatch, state } = useEditor()
 const navigate = useNavigate();
 const { roomId } = useParams();
 const [livemode, setLiveMode] = useState(false);
+
 
 useEffect(() => {
 onLiveModeChange(livemode);
@@ -436,7 +442,7 @@ onClick={toggleLiveMode}
 </div>
 
 )}
-
+<div ref={localRef}>
 {Array.isArray(state.editor.elements) && 
 state.editor.elements.map((childElement) => (
 <Component_distributor
@@ -445,9 +451,11 @@ element={childElement}
 
 />
 ))}
+</div>
+
 
 </div>
 )
 }
-
+)
 export default EditorContent
