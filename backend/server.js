@@ -3,6 +3,9 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const fs = require('fs')
+const path = require('path')
+const {exec} = require('child_process')
 
 
 const ACTIONS = {
@@ -30,6 +33,27 @@ const io = new Server(server, {
     origin: '*',
   },
 });
+
+//hosting
+app.post("/deploy", async (req, res) => {
+  const htmlContent = req.body.html;
+  const tempDir = path.join(__dirname, "temp-site");
+  const filePath = path.join(tempDir, "index.html");
+
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+  fs.writeFileSync(filePath, htmlContent);
+
+  const randomName = `flexicraft-${Date.now()}.surge.sh`;
+  const surgeCommand = `surge ./temp-site ${randomName} --token 17d12d5948c40e15aeb55778021871e8`;
+
+  exec(surgeCommand, (error, stdout, stderr) => {
+    if (error) return res.status(500).json({ error: stderr });
+    return res.json({ url: `https://${randomName}` });
+  });
+});
+
+
 
 const rooms = {}; // Store the rooms and clients connected
 
